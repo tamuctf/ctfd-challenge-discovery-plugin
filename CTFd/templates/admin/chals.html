@@ -1,0 +1,179 @@
+    <div id="create-challenge" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>New Challenge</h3>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ request.script_root }}/admin/chal/new" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" name="name" placeholder="Enter challenge name">
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <input type="text" class="form-control" name="category" placeholder="Enter challenge category">
+                        </div>
+
+                        <ul class="nav nav-tabs" role="tablist" id="new-desc-edit">
+                            <li role="presentation" class="active"><a href="#new-desc-write" aria-controls="home" role="tab" data-toggle="tab">Write</a></li>
+                            <li role="presentation"><a href="#new-desc-preview" aria-controls="home" role="tab" data-toggle="tab">Preview</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="new-desc-write">
+                                <div class="form-group">
+                                    <label for="message-text" class="control-label">Message:</label>
+                                    <textarea id="new-desc-editor" class="form-control" name="desc" rows="10"></textarea>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane content" id="new-desc-preview">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="value">Value</label>
+                            <input type="number" class="form-control" name="value" placeholder="Enter value" required>
+                        </div>
+                        <div class="form-group" style="height:75px">
+                            <div class="col-md-9" style="padding-left:0px">
+                                <label for="key">Key</label>
+                                <input type="text" class="form-control" name="key" placeholder="Enter key">
+                            </div>
+                            <div class="col-md-3" style="margin-top:30px;padding-right:0px">
+                                <div class="radio-inline">
+                                    <input type="radio" name="key_type[0]" value="0" checked>
+                                    Static
+                                </div>
+                                <div class="radio-inline">
+                                    <input type="radio" name="key_type[0]" value="1">
+                                    Regex
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="checkbox">
+                            <label>
+                                <input name="hidden" type="checkbox">
+                                Hide challenge on creation
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Upload challenge files</label>
+                          <sub class="help-block">Attach multiple files using Control+Click or Cmd+Click.</sub>
+                          <input type="file" name="files[]" multiple="multiple">
+                        </div>
+                        <input type="hidden" value="{{ nonce }}" name="nonce" id="nonce">
+                        <div style="text-align:center">
+                            <button class="btn btn-theme btn-outlined create-challenge-submit" type="submit">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="update-challenge" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="chal-title text-center"></h3>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ request.script_root }}/admin/chal/update">
+                        <input name='nonce' type='hidden' value="{{ nonce }}">
+
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control chal-name" name="name" placeholder="Enter challenge name">
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <input type="text" class="form-control chal-category" name="category" placeholder="Enter challenge category">
+                        </div>
+
+                        <ul class="nav nav-tabs" role="tablist" id="desc-edit">
+                            <li role="presentation" class="active"><a href="#desc-write" id="desc-write-link" aria-controls="home" role="tab" data-toggle="tab">Write</a></li>
+                            <li role="presentation"><a href="#desc-preview" aria-controls="home" role="tab" data-toggle="tab">Preview</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="desc-write">
+                                <div class="form-group">
+                                    <label for="message-text" class="control-label">Message:</label>
+                                    <textarea id="desc-editor" class="form-control chal-desc" name="desc" rows="10"></textarea>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane content" id="desc-preview">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="value">Value</label>
+                            <input type="number" class="form-control chal-value" name="value" placeholder="Enter value" required>
+                        </div>
+
+                        <div class="checkbox">
+                            <label>
+                                <input class="chal-attempts-checkbox" id="limit_max_attempts" name="limit_max_attempts" type="checkbox">
+                                Limit challenge attempts
+                            </label>
+                        </div>
+
+                        <div class="form-group" id="chal-attempts-group" style="display:none;">
+                            <label for="value">Max Attempts</label>
+                            <input type="number" class="form-control chal-attempts" id="chal-attempts-input" name="max_attempts" placeholder="Enter value">
+                        </div>
+                        <input class="chal-id" type='hidden' name='id' placeholder='ID'>
+
+                        <div class="checkbox">
+                            <label>
+                                <input class="chal-hidden" name="hidden" type="checkbox">
+                                Hidden
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <a href="#" data-toggle="modal" data-target="#update-tags" class="btn btn-primary">Tags</a>
+                            <a href="#" data-toggle="modal" data-target="#update-files" class="btn btn-primary">Files</a>
+                            <a href="#" data-toggle="modal" data-target="#update-keys" class="btn btn-primary">Keys</a>
+                            <a href="#" data-toggle="modal" data-target="#delete-chal" class="btn btn-danger">Delete</a>
+                            <a href="#" data-toggle="modal" data-target="#update-discoveryList" class="btn btn-primary">Discovery</a>
+                        </div>
+                        <input type="hidden" value="{{ nonce }}" name="nonce" id="nonce">
+                        <div style="text-align:center">
+                            <button class="btn btn-theme btn-outlined update-challenge-submit" type="submit">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="update-discoveryList" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h3>Discovery</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <p> At least one dropdown menu will need ALL selected challenges in it to be solved before this challenge.</p>
+                        <a href="#" id="create-discovery" class="btn btn-primary" style="margin-bottom:15px;">New Discovery</a>
+                    </div>
+                </div>
+                    
+                    <input name='nonce' type='hidden' value="{{ nonce }}">
+                    <input id="discoveryList-chal" name='chal' type='hidden'>
+                    <div id="current-discoveryList"></div>
+                    <br/>
+                    <div id="chal-discoveryList">
+                    </div>
+                    <br/>
+                    <div class="row" style="text-align:center;margin-top:20px">
+                        <input type="hidden" value="{{ nonce }}" name="nonce" id="nonce">
+                        <button class="btn btn-theme btn-outlined" id="submit-discoveryList">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
