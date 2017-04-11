@@ -11,7 +11,7 @@ from CTFd.utils import admins_only, is_admin, unix_time, get_config, \
     container_stop, container_start, get_themes, cache, upload_file
 from CTFd.models import db, Teams, Solves, Awards, Containers, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Pages, Config, DatabaseError, DiscoveryList
 from CTFd.scoreboard import get_standings
-
+from CTFd.plugins.challenges import get_chal_class
 
 from flask import render_template, request, redirect, jsonify, url_for, session, Blueprint
 from sqlalchemy.sql import or_
