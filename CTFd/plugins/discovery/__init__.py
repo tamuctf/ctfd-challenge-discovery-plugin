@@ -76,7 +76,7 @@ def load(app):
             db.session.close()
             return '1'
             
-    @admin.route('/admin/chal/delete', methods=['POST'])
+    @admin_challenges.route('/admin/chal/delete', methods=['POST'])
     @admins_only
     def admin_delete_chal():
         challenge = Challenges.query.filter_by(id=request.form['id']).first_or_404()
@@ -84,13 +84,11 @@ def load(app):
         Solves.query.filter_by(chalid=challenge.id).delete()
         Keys.query.filter_by(chal=challenge.id).delete()
         files = Files.query.filter_by(chal=challenge.id).all()
+        for f in files:
+            utils.delete_file(f.id)
         Files.query.filter_by(chal=challenge.id).delete()
-        for file in files:
-            folder = os.path.dirname(os.path.join(os.path.normpath(app.root_path), 'uploads', file.location))
-            rmdir(folder)
         Tags.query.filter_by(chal=challenge.id).delete()
         DiscoveryList.query.filter_by(chal=challenge.id).delete()
-        # Hint.query.filter_by(chal=challenge.id).delete()
         Challenges.query.filter_by(id=challenge.id).delete()
         db.session.commit()
         db.session.close()
@@ -105,20 +103,27 @@ def load(app):
                 else:
                     return redirect(url_for('views.static_html'))
         if user_can_view_challenges() and (ctf_started() or is_admin()):
-            chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).add_columns('id', 'name', 'value', 'description', 'category').order_by(Challenges.value).all()
-            
+            chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
+
             if len(chals)!=0:
-              chals = discovery(chals)
-                 
-            # THIS IS WHERE TO ADD HINT STUFF <<<----
-            
+                  chals = discovery(chals)
+
             json = {'game': []}
             for x in chals:
-                tags = [tag.tag for tag in Tags.query.add_columns('tag').filter_by(chal=x[1]).all()]
+                tags = [tag.tag for tag in Tags.query.add_columns('tag').filter_by(chal=x.id).all()]
                 files = [str(f.location) for f in Files.query.filter_by(chal=x.id).all()]
-                # hint = [str(f.location) for f in Hint.query.filter_by(chal=x.id).all()]
-                json['game'].append({'id': x[1], 'name': x[2], 'value': x[3], 'description': x[4], 'category': x[5], 'files': files, 'tags': tags})
-            
+                chal_type = get_chal_class(x.type)
+                json['game'].append({
+                    'id': x.id,
+                    'type': chal_type.name,
+                    'name': x.name,
+                    'value': x.value,
+                    'description': x.description,
+                    'category': x.category,
+                    'files': files,
+                    'tags': tags
+                })
+
             db.session.close()
             return jsonify(json)
         else:
