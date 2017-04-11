@@ -1,4 +1,11 @@
 var challenges;
+var templates = {};
+
+Handlebars.registerHelper('splitSlash', function(filename) {
+    var filename = filename.split("/");
+    filename = filename[filename.length - 1];
+    return filename;
+});
 
 function loadchal(id) {
     var obj = $.grep(challenges['game'], function (e) {
@@ -17,36 +24,56 @@ function loadchalbyname(chalname) {
 }
 
 function updateChalWindow(obj) {
-    window.location.replace(window.location.href.split('#')[0] + '#' + obj.name);
-    var chal = $('#chal-window');
-    chal.find('.chal-name').text(obj.name);
-    chal.find('.chal-desc').html(marked(obj.description, {'gfm':true, 'breaks':true}));
-    // chal.find('.chal-hint').html(marked(obj.hint, {'gfm':true, 'breaks':true}));
-    chal.find('.chal-files').empty();
-    for (var i = 0; i < obj.files.length; i++) {
-        var filename = obj.files[i].split('/');
-        filename = filename[filename.length - 1];
-        $('#chal-window').find('.chal-files').append("<div class='col-md-3 file-button-wrapper'><a class='file-button' href='" + script_root + '/files/' + obj.files[i] + "'><label class='challenge-wrapper file-wrapper hide-text'>" + filename + "</label></a></div>")
-    }
+    $.get(script_root + '/static/original/js/templates/challenges/'+obj.type+'/'+obj.type+'-challenge-modal.hbs', function(template_data){
+        $('#chal-window').empty();
+        templates[obj.type] = template_data;
+        var template_data = templates[obj.type];
+        template_data['script_root'] = script_root;
+        var template = Handlebars.compile(template_data);
+        var solves = obj.solves == 1 ? " Solve" : " Solves";
+        solves = obj.solves + solves;
 
-    var tags = chal.find('.chal-tags');
-    tags.empty();
-    var tag = "<span class='label label-primary chal-tag'>{0}</span>";
-    for (var i = 0; i < obj.tags.length; i++){
-        var data = tag.format(obj.tags[i]);
-        tags.append($(data));
-    }
+        var nonce = $('#nonce').val();
+        var wrapper  = {
+            id: obj.id,
+            name: obj.name,
+            value: obj.value,
+            tags: obj.tags,
+            desc: obj.description,
+            solves: solves,
+            files: obj.files,
+            hints: obj.hints
+        };
 
-    chal.find('.chal-value').text(obj.value);
-    chal.find('.chal-hint').text(obj.hint);
-    chal.find('.chal-category').text(obj.category);
-    chal.find('#chal-id').val(obj.id);
-    var solves = obj.solves == 1 ? " Solve" : " Solves";
-    chal.find('.chal-solves').text(obj.solves + solves);
-    $('#answer').val("");
+        $('#chal-window').append(template(wrapper));
+        $.getScript(script_root + '/static/original/js/templates/challenges/'+obj.type+'/'+obj.type+'-challenge-script.js',
+            function() {
+                // Handle Solves tab
+                $('.chal-solves').click(function (e) {
+                    getsolves($('#chal-id').val())
+                });
+                $('.nav-tabs a').click(function (e) {
+                    e.preventDefault();
+                    $(this).tab('show')
+                });
 
-    $('pre code').each(function(i, block) {
-        hljs.highlightBlock(block);
+                // Handle modal toggling
+                $('#chal-window').on('hide.bs.modal', function (event) {
+                    $("#answer-input").removeClass("wrong");
+                    $("#answer-input").removeClass("correct");
+                    $("#incorrect-key").slideUp();
+                    $("#correct-key").slideUp();
+                    $("#already-solved").slideUp();
+                    $("#too-fast").slideUp();
+                });
+
+                // $('pre code').each(function(i, block) {
+                //     hljs.highlightBlock(block);
+                // });
+
+                window.location.replace(window.location.href.split('#')[0] + '#' + obj.name);
+                $('#chal-window').modal();
+        });
     });
 }
 
@@ -73,7 +100,7 @@ function submitkey(chal, key, nonce) {
         result_message.text(result.message);
 
         if (result.status == -1){
-          window.location="/login"
+          window.location = script_root + "/login?next=" + script_root + window.location.pathname + window.location.hash
           return
         }
         else if (result.status == 0){ // Incorrect key
@@ -95,7 +122,6 @@ function submitkey(chal, key, nonce) {
             answer_input.val("");
             answer_input.removeClass("wrong");
             answer_input.addClass("correct");
-            loadchals();
         }
         else if (result.status == 2){ // Challenge already solved
             result_notification.addClass('alert alert-info alert-dismissable');
@@ -167,7 +193,7 @@ function getsolves(id){
   });
 }
 
-function loadchals() {
+function loadchals(refresh) {
     $.get(script_root + "/chals", function (data) {
         var categories = [];
         challenges = $.parseJSON(JSON.stringify(data));
@@ -201,7 +227,7 @@ function loadchals() {
             var chalid = chalinfo.name.replace(/ /g,"-").hashCode();
             var catid = chalinfo.category.replace(/ /g,"-").hashCode();
             var chalwrap = $("<div id='{0}' class='challenge-wrapper col-md-2'></div>".format(chalid));
-            var chalbutton = $("<button class='challenge-button trigger theme-background hide-text' value='{0}' data-toggle='modal' data-target='#chal-window'></div>".format(chalinfo.id));
+            var chalbutton = $("<button class='challenge-button trigger theme-background hide-text' value='{0}'></div>".format(chalinfo.id));
             var chalheader = $("<h5>{0}</h5>".format(chalinfo.name));
             var chalscore = $("<span>{0}</span>".format(chalinfo.value));
             chalbutton.append(chalheader);
@@ -218,13 +244,28 @@ function loadchals() {
             }
         };
 
-        updatesolves(load_location_hash);
+        if (!refresh){
+            updatesolves(load_location_hash);
+        }
         marksolves();
 
         $('.challenge-button').click(function (e) {
             loadchal(this.value);
         });
     });
+}
+
+function loadhint(hintid){
+    if (confirm("Are you sure you want to open this hint?")){
+        $.post(script_root + "/hints/" + hintid, {'nonce': $('#nonce').val()}, function(data){
+            if (data.errors){
+                alert(data.errors);
+            } else {
+                $('#hint-modal-body').html(marked(data.hint, {'gfm':true, 'breaks':true}));
+                $('#hint-modal').modal();
+            }
+        });
+    }
 }
 
 $('#submit-key').click(function (e) {
@@ -267,7 +308,7 @@ function colorhash (x) {
 }
 
 function update(){
-    loadchals();
+    loadchals(true);
 }
 
 $(function() {
