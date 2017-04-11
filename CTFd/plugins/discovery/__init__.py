@@ -76,7 +76,7 @@ def load(app):
             db.session.close()
             return '1'
             
-    @admin_challenges.route('/admin/chal/delete', methods=['POST'])
+    @admin.route('/admin/chal/delete', methods=['POST'])
     @admins_only
     def admin_delete_chal():
         challenge = Challenges.query.filter_by(id=request.form['id']).first_or_404()
