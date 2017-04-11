@@ -9,9 +9,16 @@ h1, h2 {
     font-weight: 500;
     letter-spacing: 2px;
 }
+li {
+    font-family: HACKED;
+    font-size: 18px;
+    letter-spacing: 0.2rem;
+}
 
 td {
     padding: 15px !important;
+    font-family: "Open Sans";
+    font-size: 18px;
 }
 
 a {
