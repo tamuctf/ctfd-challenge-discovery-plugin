@@ -132,6 +132,8 @@ def load(app):
             
             
     def discovery(chals):
+        if is_admin():
+            return chals
         discovered = []
         for x in chals:
           show, and_list = 0, []
