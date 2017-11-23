@@ -1,0 +1,8 @@
+# Ignore everything except Plugin information
+/*
+!.gitignore
+!/CTFd
+/CTFd/*
+!/CTFd/plugins/
+/CTFd/plugins/*
+!/CTFd/plugins/discovery
