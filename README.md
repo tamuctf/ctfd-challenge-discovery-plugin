@@ -6,7 +6,7 @@ This will allow for certain problems to show up only after a predefined set of p
 
 *DISCLAIMER* This plugin is currently in development, and therefore does not work.
 
--If you would like to see a working version of this plugin, please go to ad59aea3919e471d593a3f61e490da9ba06a4bcd and use the CTFd plateform from 8c090d7657c49e29fb434bd8eb62a7b8ee7f274e . Please note that this previous version is a duct tape solution, so please be advised.
+-If you would like to see a working version of this plugin, please go to [ad59aea3919e471d593a3f61e490da9ba06a4bcd](https://github.com/tamuctf/ctfd-challenge-discovery-plugin/commit/ad59aea3919e471d593a3f61e490da9ba06a4bcd "ad59aea") and use the CTFd plateform from [8c090d7657c49e29fb434bd8eb62a7b8ee7f274e](https://github.com/tamuctf/CTFd/commit/8c090d7657c49e29fb434bd8eb62a7b8ee7f274e "8c090d7"). Please note that this previous version is a duct tape solution, so please be advised.
 
 # Usage:
 There are two different functions this plugin has: Adding challenge-discovery information to a given challenge, and Deleting challenge-dsicvoery information from a given challenge.
