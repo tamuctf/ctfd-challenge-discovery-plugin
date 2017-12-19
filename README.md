@@ -4,7 +4,9 @@ This is a CTFd platform plugin that allows for Challenge Discovery.
 # Challenge Discovery
 This will allow for certain problems to show up only after a predefined set of problems have been solved.
 
-*DISCLAIMER* This plugin still needs to have an overhaul in the Admin's GUI section. And there also needs to be a more automated way of doing things.
+*DISCLAIMER* This plugin is currently in development, and therefore does not work.
+
+-If you would like to see a working version of this plugin, please go to ad59aea3919e471d593a3f61e490da9ba06a4bcd and use the CTFd plateform from 8c090d7657c49e29fb434bd8eb62a7b8ee7f274e . Please note that this previous version is a duct tape solution, so please be advised.
 
 # Usage:
 There are two different functions this plugin has: Adding challenge-discovery information to a given challenge, and Deleting challenge-dsicvoery information from a given challenge.
