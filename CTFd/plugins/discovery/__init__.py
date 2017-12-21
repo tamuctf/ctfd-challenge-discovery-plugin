@@ -104,37 +104,39 @@ def load(app):
             teamid = session.get('id')
             chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
         
-        # Only two line in chals() needed to add for Challenge Discovery
-        # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
-        if len(chals)!=0:
-                chals = discovery(chals)
-        # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-        
+            # Only two line in chals() needed to add for Challenge Discovery
+            # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
+            if len(chals)!=0:
+                    chals = discovery(chals)
+                    print("Outside")
+                    print(chals)
+            # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-   
 
-        json = {'game': []}
-        for x in chals:
-            tags = [tag.tag for tag in Tags.query.add_columns('tag').filter_by(chal=x.id).all()]
-            files = [str(f.location) for f in Files.query.filter_by(chal=x.id).all()]
-            unlocked_hints = set([u.itemid for u in Unlocks.query.filter_by(model='hints', teamid=teamid)])
-            hints = []
-            for hint in Hints.query.filter_by(chal=x.id).all():
-                if hint.id in unlocked_hints or utils.ctf_ended():
-                    hints.append({'id': hint.id, 'cost': hint.cost, 'hint': hint.hint})
-                else:
-                    hints.append({'id': hint.id, 'cost': hint.cost})
-            chal_type = get_chal_class(x.type)
-            json['game'].append({
-                'id': x.id,
-                'type': chal_type.name,
-                'name': x.name,
-                'value': x.value,
-                'description': x.description,
-                'category': x.category,
-                'files': files,
-                'tags': tags,
-                'hints': hints,
-                'template': chal_type.templates['modal'],
-                'script': chal_type.scripts['modal'],
-            })
+            json = {'game': []}
+            for x in chals:
+                tags = [tag.tag for tag in Tags.query.add_columns('tag').filter_by(chal=x.id).all()]
+                files = [str(f.location) for f in Files.query.filter_by(chal=x.id).all()]
+                unlocked_hints = set([u.itemid for u in Unlocks.query.filter_by(model='hints', teamid=teamid)])
+                hints = []
+                for hint in Hints.query.filter_by(chal=x.id).all():
+                    if hint.id in unlocked_hints or utils.ctf_ended():
+                        hints.append({'id': hint.id, 'cost': hint.cost, 'hint': hint.hint})
+                    else:
+                        hints.append({'id': hint.id, 'cost': hint.cost})
+                chal_type = get_chal_class(x.type)
+                json['game'].append({
+                    'id': x.id,
+                    'type': chal_type.name,
+                    'name': x.name,
+                    'value': x.value,
+                    'description': x.description,
+                    'category': x.category,
+                    'files': files,
+                    'tags': tags,
+                    'hints': hints,
+                    'template': chal_type.templates['modal'],
+                    'script': chal_type.scripts['modal'],
+                })
 
             db.session.close()
             return jsonify(json)
@@ -144,31 +146,36 @@ def load(app):
             
             
     def discovery(chals):
-        if is_admin():
-            return chals
+        print("Testing")
+        print(chals)
+        #if is_admin():
+        #    print("In Admin")
+        #    return chals
         discovered = []
         for x in chals:
           show, and_list = 0, []
-          #print("Challenge #" + str(x.id) + " - Needed problems solved to be seen:")
+          print("Challenge #" + str(x.id) + " - Needed problems solved to be seen:")
           for y in DiscoveryList.query.add_columns('id', 'discovery', 'chal').all(): # For each OR set
             if (str(y.chal) == str(x.id) and show != 1):
               and_list = map(int, (y.discovery).split('&'))
-              #print("NEEDED: " + str(and_list))
+              print("NEEDED: " + str(and_list))
               for need_solved in and_list: # For each AND elem
                 show = 2
                 for z in Solves.query.add_columns('chalid').filter_by(teamid=session['id']).all():
                   if need_solved == z.chalid:
                     show = 1 # Chal is solved and is needed
-                    #print("Challenge ID: " + str(need_solved) + " has been solved & is needed")
+                    print("Challenge ID: " + str(need_solved) + " has been solved & is needed")
                     break
                 if (show == 2): #Challenge is not solved and is needed
                   and_list=[] # Mark wrong
                   break
           if ((len(and_list)==0 and show == 0) or show==1):
-            #print("Shown, because of:" + str(and_list) + " show:" + str(show) +'\n')
+            print("Shown, because of:" + str(and_list) + " show:" + str(show) +'\n')
             discovered.append(x)
-          #else:
-            #print("HIDDEN, solved:" + str(and_list) + " show:" + str(show) +'\n')
+          else:
+            print("HIDDEN, solved:" + str(and_list) + " show:" + str(show) +'\n')
+
+        print(chals)
         return discovered 
     
     app.view_functions['challenges.chals'] = chals
