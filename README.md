@@ -10,6 +10,31 @@ This will allow for certain problems to show up only after a predefined set of p
 # Usage:
 There are two different functions this plugin has: Adding challenge-discovery information to a given challenge, and Deleting challenge-dsicvoery information from a given challenge.
 
+# ADDING AUTO-LOAD CHALLENGES AFTER SOLVING CHALLENGE FEATURE
+Correctly, the default theme does not support Challenge Discovery completely. When a user submits a correct answer, the challenges displayed aren't updated until they refresh.
+
+To correct this, all that has to be down is to add:
+`update();`
+
+at the end of the submitkey(chal, key, nonce) function of the chalboard.js in the theme folder that your CTFd instance is using. Specifically, for CTFd 1.0.5, this file is found in CTFd\themes\original\static\js\chalboard.js. Specifically, in CTFd 1.0.5, this line of code can be placed on line 125 of the chalboard.js file. Below I have an example of how the "update();" line could be put in:
+
+
+```
+else if (result.status == 1){ // Challenge Solved
+            result_notification.addClass('alert alert-success alert-dismissable text-center');
+            result_notification.slideDown();
+
+            $('.chal-solves').text((parseInt($('.chal-solves').text().split(" ")[0]) + 1 +  " Solves") );
+
+            answer_input.val("");update()
+            answer_input.removeClass("wrong");
+            answer_input.addClass("correct");
+            
+            update(); //For Auto-Loading Challenges
+}
+```
+
+
 # Installing
 Simply copy the files in this repo into an existing [CTFd 1.0.5](https://github.com/CTFd/CTFd/releases/tag/1.0.5) CTF workspace. You will most likely need to delete the CTFd\ctfd.db file in your instance and restart the CTFd service.
 
