@@ -103,14 +103,11 @@ def load(app):
         if utils.user_can_view_challenges() and (utils.ctf_started() or utils.is_admin()):
             teamid = session.get('id')
             chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
-        
-            # Only two line in chals() needed to add for Challenge Discovery
-            # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
-            if len(chals)!=0:
-                    chals = discovery(chals)
-                    print("Outside")
-                    print(chals)
-            # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-   
+
+            # Only one line in chals() needed to add for Challenge Discovery
+	    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
+	    chals = discovery(chals) if len(chals)!=0 else chals
+	    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-   
 
             json = {'game': []}
             for x in chals:
