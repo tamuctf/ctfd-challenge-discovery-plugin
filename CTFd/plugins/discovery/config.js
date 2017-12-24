@@ -8,21 +8,24 @@ function loadchals2(){
     }, function (data) {
         categories = [];
         challenges = $.parseJSON(JSON.stringify(data));
+        chalList = [];
 
         for (var i = challenges['game'].length - 1; i >= 0; i--) {
             if ($.inArray(challenges['game'][i].category, categories) == -1) {
                 categories.push(challenges['game'][i].category)
             }
+            chalList.push([challenges['game'][i].id,challenges['game'][i].name])
         };
+        console.log(chalList);
 
         for (var j = 0; j <= categories.length - 1; j++){
             $('#challenges2').append($('<tr id="' + categories[j] + '"><td class="col-md-1"><h2>' + categories[j] + '</h2></td></tr>'))
             for (var i = 0; i <= challenges['game'].length - 1; i++) {
                if ($.inArray(challenges['game'][i].category, categories[j]) == -1) {
-                   console.log("Challenge: " + challenges['game'][i].name + " was found to be in: " + challenges['game'][i].category);
+                   //console.log("Challenge: " + challenges['game'][i].name + " was found to be in: " + challenges['game'][i].category);
                    var chalDisc = '<button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p>{2}</p></button>'.format(challenges['game'][i].id, challenges['game'][i].name, challenges['game'][i].value);
 
-                  chalDisc += '<div class="discovery" id="discovery-{0}"></div></br></br></br></br>'.format(challenges['game'][i].id);
+                  chalDisc += '<div class="discovery" id="discovery-{0}" value="{1}"></div></br></br></br></br>'.format(challenges['game'][i].id, challenges['game'][i].name);
                   $('#challenges2').append($(chalDisc));
 
                }
@@ -35,6 +38,27 @@ function loadchals2(){
             var chal = challenges['game'][i];
             var chal_button = $('<button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p class="chal-points">{2}</p><span class="chal-percent">{3}% solved</span></button>'.format(chal.id, chal.name, chal.value, Math.round(chal.percentage_solved * 100)));
             $('#' + challenges['game'][i].category.replace(/ /g,"-").hashCode()).append(chal_button);
+
+   
+            $.get(script_root + '/admin/discoveryList/' + chal.id, function(data){
+                discoveryList = $.parseJSON(JSON.stringify(data));
+                discoveryList = discoveryList['discoveryList'];
+                console.log('Challenge: ' + chal.id);
+                console.log(chalList)
+                for (var j = 0; j < discoveryList.length; j++) {
+                    list = discoveryList[j].discovery.split("&");
+                    for (var k=0; j < chalList.length; k++){
+                    	console.log(list[0]);
+                    }
+
+
+
+
+                    discovery = "<span class='label label-primary chal-discovery discovery-"+ (discoveryList[j].chal) +"'><span>"+discoveryList[j].discovery+"</span><a name='"+discoveryList[j].id+"'' class='delete-discovery'>&#215;</a></span>";
+                    $('#discovery-'+discoveryList[j].chal).append(discovery);
+                };
+            });
+            
         };
 
         $('#challenges2 button').click(function (e) {
@@ -45,72 +69,11 @@ function loadchals2(){
             });
         });
 
-
-        $(".chal-button").each(function() { 
-            console.log("ID: "+ this.value);
-            $.get(script_root + '/admin/discoveryList/' + this.value, function(data){
-                discoveryList = $.parseJSON(JSON.stringify(data));
-                discoveryList = discoveryList['discoveryList'];
-                List=[];
-
-                for (var i=0; i<= discoveryList.length -1; i++){
-                    List.push(discoveryList[i].discovery);
-                    $(this).parent().append('<p>HEEEEELLLLLOOO</p><div>{0}</div>'.format(discoveryList[i].discovery));
-                }
-                console.log(List);
-            });
-         });
-
     });
-}
-
-function loadAllDiscovery(){
-    chals = [];
-    $.post(script_root + "/admin/chals", {
-        'nonce': $('#nonce').val()
-    }, function (data) {
-        categories = [];
-        challenges = $.parseJSON(JSON.stringify(data));
-
-        for (var i = 0; i <= challenges['game'].length - 1; i++) {
-            chal = challenges['game'][i].id;
-
-            $.get(script_root + '/admin/discoveryList/' + chal, function(data){
-                discoveryList = $.parseJSON(JSON.stringify(data));
-                discoveryList = discoveryList['discoveryList'];
-                console.log('Challenge: ' + chal);
-                console.log(discoveryList);
-                for (var j = 0; j < discoveryList.length; j++) {
-                    discovery = "<span class='label label-primary chal-discovery discovery-"+ (discoveryList[j].chal) +"'><span>"+discoveryList[j].discovery+"</span><a name='"+discoveryList[j].id+"'' class='delete-discovery'>&#215;</a></span>";
-                    $('#discovery-'+discoveryList[j].chal).append(discovery);
-                };
-            });
-        }
-        console.log(chals)
-
-    });
-    console.log("Load All Discovery")
-    console.log(chals)
-    for (var i = 0; i <= chals.length - 1; i++) {
-        chal = chals[i];
-        $.get(script_root + '/admin/discoveryList/' + chal, function(data){
-            discoveryList = $.parseJSON(JSON.stringify(data));
-            discoveryList = discoveryList['discoveryList'];
-            console.log('Challenge: ' + chal);
-            console.log(discoveryList);
-            for (var i = 0; i < discoveryList.length; i++) {
-                discovery = "<span class='label label-primary chal-discovery'><span>"+discoveryList[i].discovery+"</span><a name='"+discoveryList[i].id+"'' class='delete-discovery'>&#215;</a></span>";
-                $('#discovery-'+chal).append(discovery);
-            };
-        });
-    }
-
-
 }
 
 
 $(function(){
-    loadAllDiscovery();
     loadchals2();
 })
 
