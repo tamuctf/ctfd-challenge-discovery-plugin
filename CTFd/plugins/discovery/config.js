@@ -1,9 +1,60 @@
+//         Modified CTFd/themes/admin/static/js/chalboard.js Functions
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+function loadchals2(){
+    $('#challenges2').empty();
+    $.post(script_root + "/admin/chals", {
+        'nonce': $('#nonce').val()
+    }, function (data) {
+        categories = [];
+        challenges = $.parseJSON(JSON.stringify(data));
+        console.log(challenges);
+
+
+        for (var i = challenges['game'].length - 1; i >= 0; i--) {
+            if ($.inArray(challenges['game'][i].category, categories) == -1) {
+                categories.push(challenges['game'][i].category)
+            }
+        };
+        console.log(categories);
+
+        for (var j = 0; j <= categories.length - 1; j++){
+            $('#challenges2').append($('<tr id="' + categories[j] + '"><td class="col-md-1"><h3>' + categories[j] + '</h3></td></tr>'))
+            for (var i = 0; i <= challenges['game'].length - 1; i++) {
+               if ($.inArray(challenges['game'][i].category, categories[j]) == -1) {
+                   console.log("Challenge: " + challenges['game'][i].name + " was found to be in: " + challenges['game'][i].category);
+                   $('#challenges2').append($('<button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p>{2}</p></button></br></br></br></br>'.format(challenges['game'][i].id, challenges['game'][i].name, challenges['game'][i].value)));
+
+
+               }
+            }
+        }
+
+        for (var i = 0; i <= challenges['game'].length - 1; i++) {
+            var chal = challenges['game'][i];
+            var chal_button = $('<button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p class="chal-points">{2}</p><span class="chal-percent">{3}% solved</span></button>'.format(chal.id, chal.name, chal.value, Math.round(chal.percentage_solved * 100)));
+            $('#' + challenges['game'][i].category.replace(/ /g,"-").hashCode()).append(chal_button);
+        };
+
+        $('#challenges2 button').click(function (e) {
+            id = this.value
+            load_chal_template(id, function(){
+                openchal(id);
+                loaddiscoveryList(id);
+            });
+        });
+
+    });
+}
+
+$(function(){
+    loadchals2();
+})
 
 //         Challenge Discovery JS
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-function loaddiscoveryList(){
+function loaddiscoveryList(){chals
     var chal = $('.chal-id').val();
 
     $('#current-discoveryList').empty();

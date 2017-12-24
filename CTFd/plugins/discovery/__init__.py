@@ -73,7 +73,7 @@ def load(app):
             db.session.commit()
             db.session.close()
             return '1'
-            
+            openchal
     #@admin.route('/admin/chal/delete', methods=['POST'])
     #@admins_only
     #def admin_delete_chal():
