@@ -82,7 +82,7 @@ function loadAllDiscovery(){
                 console.log(discoveryList);
                 for (var j = 0; j < discoveryList.length; j++) {
                     discovery = "<span class='label label-primary chal-discovery discovery-"+ (discoveryList[j].chal) +"'><span>"+discoveryList[j].discovery+"</span><a name='"+discoveryList[j].id+"'' class='delete-discovery'>&#215;</a></span>";
-                    $('#discovery-'+chal).append(discovery);
+                    $('#discovery-'+discoveryList[j].chal).append(discovery);
                 };
             });
         }
