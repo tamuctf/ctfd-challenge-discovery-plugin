@@ -12,52 +12,65 @@ function loadchals2(){
 
         for (var i = challenges['game'].length - 1; i >= 0; i--) {
             if ($.inArray(challenges['game'][i].category, categories) == -1) {
+                $('#challenges2').append($('<tr id="' + challenges['game'][i].category + '"><td class="col-md-1"><h2>' + challenges['game'][i].category + '</h2></td></tr>'))
                 categories.push(challenges['game'][i].category)
+
+                for (var k = 0; k <= challenges['game'].length - 1; k++) {
+                    if (challenges['game'][k].category == challenges['game'][i].category) {
+                        console.log("Challenge: " + challenges['game'][k].name + " was found to be in: " + challenges['game'][k].category);
+                        var chalDisc = '<button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p>{2}</p></button>'.format(challenges['game'][k].id, challenges['game'][k].name, challenges['game'][k].value);
+   
+                       chalDisc += '<div class="discovery" id="discovery-{0}" value="{1}"></div></br></br></br></br>'.format(challenges['game'][k].id, challenges['game'][k].name);
+                       $('#challenges2').append($(chalDisc));
+               }
+            }
+
             }
             chalList.push([challenges['game'][i].id,challenges['game'][i].name])
         };
-        console.log(chalList);
-
-        for (var j = 0; j <= categories.length - 1; j++){
-            $('#challenges2').append($('<tr id="' + categories[j] + '"><td class="col-md-1"><h2>' + categories[j] + '</h2></td></tr>'))
-            for (var i = 0; i <= challenges['game'].length - 1; i++) {
-               if ($.inArray(challenges['game'][i].category, categories[j]) == -1) {
-                   //console.log("Challenge: " + challenges['game'][i].name + " was found to be in: " + challenges['game'][i].category);
-                   var chalDisc = '<button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p>{2}</p></button>'.format(challenges['game'][i].id, challenges['game'][i].name, challenges['game'][i].value);
-
-                  chalDisc += '<div class="discovery" id="discovery-{0}" value="{1}"></div></br></br></br></br>'.format(challenges['game'][i].id, challenges['game'][i].name);
-                  $('#challenges2').append($(chalDisc));
-
-               }
-            }
-        }
+        console.log(chalList[0][0]);
         
         
 
         for (var i = 0; i <= challenges['game'].length - 1; i++) {
             var chal = challenges['game'][i];
-            var chal_button = $('<button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p class="chal-points">{2}</p><span class="chal-percent">{3}% solved</span></button>'.format(chal.id, chal.name, chal.value, Math.round(chal.percentage_solved * 100)));
+            var chal_button = $('<button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p class="chal-points">{2}</p><span class="chal-percent">{3}% solved</span></button><table>'.format(chal.id, chal.name, chal.value, Math.round(chal.percentage_solved * 100)));
             $('#' + challenges['game'][i].category.replace(/ /g,"-").hashCode()).append(chal_button);
 
    
             $.get(script_root + '/admin/discoveryList/' + chal.id, function(data){
                 discoveryList = $.parseJSON(JSON.stringify(data));
                 discoveryList = discoveryList['discoveryList'];
-                console.log('Challenge: ' + chal.id);
-                console.log(chalList)
-                for (var j = 0; j < discoveryList.length; j++) {
+                for (var j = 0; j < discoveryList.length; j++) { //For each ANDed set
+                    andSet = []
                     list = discoveryList[j].discovery.split("&");
-                    for (var k=0; j < chalList.length; k++){
-                    	console.log(list[0]);
+                    console.log(list);
+                    for (var k=0; k < list.length; k++){
+                        for (var l=0; l<chalList.length; l++){
+                            if(chalList[l][0]==list[k]){
+                                andSet.push(chalList[l][1]);
+                            }
+                        }
+                    }
+                
+
+                    discovery = "<td style='background-color: #4bcdcd; padding: 20px; border: 1px solid #dddddd;'><span class='chal-discovery discovery-"+ (discoveryList[j].chal) + "'>"
+                   
+                    for (var k=0; k < andSet.length; k++){
+                        discovery += "<p style='color:red;'>"+andSet[k]+"</p>"
                     }
 
-
-
-
-                    discovery = "<span class='label label-primary chal-discovery discovery-"+ (discoveryList[j].chal) +"'><span>"+discoveryList[j].discovery+"</span><a name='"+discoveryList[j].id+"'' class='delete-discovery'>&#215;</a></span>";
+                    discovery += "</span><a name='"+discoveryList[j].id+"'' class='delete-discovery'>&#215;</a></span></td>";
                     $('#discovery-'+discoveryList[j].chal).append(discovery);
                 };
+                $('.delete-discovery').click(function(e){
+            	    deletediscovery(e.target.name);
+                    $(e.target).parent().remove();
+                    openchal(id);
+                    loaddiscoveryList(id);
+        	});
             });
+            $('#' + challenges['game'][i].category.replace(/ /g,"-").hashCode()).append($('</table>'));
             
         };
 
@@ -232,6 +245,7 @@ function builddiscovery(){
 $('#submit-discoveryList').click(function (e) {
     e.preventDefault();
     updatediscoveryList();
+    loadchals2();
 });
 
 $("#challenges").click(function(e) {
