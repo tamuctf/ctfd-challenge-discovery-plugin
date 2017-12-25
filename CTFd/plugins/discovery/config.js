@@ -22,11 +22,12 @@ function loadchals2(){
                         
                        var chalDisc = '<table class="discovery" id="discovery-{0}" value="{1}" cellspacing="0" cellpadding="0" style="display: inline-block;"></table></br></br></br></br>'.format(challenges['game'][k].id, challenges['game'][k].name);
                        $('#challenges2').append($(chalDisc));
-                       $('#discovery-'+challenges['game'][k].id).append('<tr><td><button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p>{2}</p></button></td><td><div id="current-discoveryList-{0}"></div><div id="chal-discoveryList-{0}"></div>'.format(challenges['game'][k].id, challenges['game'][k].name, challenges['game'][k].value));
-                      
-                       $('#discovery-'+challenges['game'][k].id).append(builddiscovery(challenges['game'][k].name, challenges['game'][k].id, challenges));
 
-                       //$('#discovery-'+challenges['game'][k].id).append($('</td></tr>'));
+                       $('#discovery-'+challenges['game'][k].id).append('<tr id="disc-drop-'+challenges['game'][k].id+'"><td><button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p>{2}</p></button></td><td><div id="current-discoveryList-{0}" style="display: none;"></div><div id="chal-discoveryList-{0}" style="display: none;"></div>'.format(challenges['game'][k].id, challenges['game'][k].name, challenges['game'][k].value));
+                      
+                       $('#disc-drop-'+challenges['game'][k].id).append(builddiscovery(challenges['game'][k].name, challenges['game'][k].id, challenges));
+
+                       $('#disc-drop-'+challenges['game'][k].id).append($('</td></tr>'));
                     }
                 }
 
@@ -56,20 +57,19 @@ function loadchals2(){
                     }
                 
  
-                    discovery = "<td style='background-color: #4bcdcd; border: 1px solid #dddddd;'><span class='chal-discovery discovery-"+ (discoveryList[j].chal) + "'>"
+                    discovery = "<td style='background-color: #4bcdcd; border: 1px solid #dddddd;'><span class='chal-discovery discovery-"+ (discoveryList[j].chal) + "' value='"+ discoveryList[j].chal +"'>"
                    
                     for (var k=0; k < andSet.length; k++){
                         discovery += "<p style='color:red;'>"+andSet[k]+"</p>"
                     }
 
-                    discovery += "</span><a name='"+discoveryList[j].id+"'' class='delete-discovery'>&#215;</a></span></td>";
+                    discovery += "</span><a name='"+discoveryList[j].id+"'' class='delete-discovery' id='"+ discoveryList[j].chal +"'>&#215;</a></span></td>";
                     $('#discovery-'+discoveryList[j].chal).append(discovery);
                 }
                 $('.delete-discovery').click(function(e){
             	    deletediscovery(e.target.name);
                     $(e.target).parent().remove();
-                    openchal(id);
-                    loaddiscoveryList(id);
+                    loaddiscoveryList(e.target.id);
         	});
             });
             
@@ -77,10 +77,14 @@ function loadchals2(){
 
         $('.chal-button').click(function (e) {
             id = this.value
-            load_chal_template(id, function(){
-                openchal(id);
-                loaddiscoveryList(id);
-            });
+            updatediscoveryList2(id);
+            
+            
+
+            //UNCOMMENT BELOW FOR DEBUGGING
+            //load_chal_template(id, function(){
+            //    openchal(id);
+            //});
         });
 
     });
@@ -98,7 +102,7 @@ $(function(){
 
 
 
-function loaddiscoveryList(){
+function loaddiscoveryList1(){
     var chal = $('.chal-id').val();
 
     $('#current-discoveryList').empty();
@@ -163,6 +167,22 @@ function updateALLdiscoveryList(){
 	    $.post(script_root + '/admin/discoveryList/'+chal, {'discoveryList':discoveryList, 'nonce': $('#nonce').val()})
 	    loaddiscoveryList(chal);
     });
+    loadchals2();
+}
+
+function updatediscoveryList2(chal){
+    discoveryList = [];
+
+    console.log("Beginning to update stuff");
+
+    discoveryList = [];
+
+    $('#chal-discoveryList-'+chal+' > span').each(function(i, e){
+	discoveryList.push($(e).text());
+    });
+
+    $.post(script_root + '/admin/discoveryList/'+chal, {'discoveryList':discoveryList, 'nonce': $('#nonce').val()})
+    loaddiscoveryList(chal);
     loadchals2();
 }
 
@@ -300,7 +320,7 @@ function builddiscovery(chal, id, challenges){
     var elem = $('<div class="col-md-12 row current-discovery">');
     
     var dropdown = $('<div class="btn-group dropdown" role="group">');
-    dropdown.append('<button class="btn btn-default dropdown-toggle" type="button" id="discovery_dropdown-' + id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><span class="chal-quantity">0</span> Challenges<span class="chal-plural">s</span> <span class="caret"></span></button>');
+    dropdown.append('<button class="btn btn-default dropdown-toggle disc-drop" type="button" id="discovery_dropdown-' + id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" value="'+id+'"><span class="chal-quantity">0</span> Challenges<span class="chal-plural">s</span> <span class="caret"></span></button>');
 
     var options = $('<ul class="dropdown-menu" aria-labelledby="discovery_dropdown">');
     dropdown.append(options);
@@ -332,6 +352,11 @@ function builddiscovery(chal, id, challenges){
                         discElem.push(optionText);
                     }
                 }
+
+                if($(this).parent().find(".active").length == 0){
+                   $('#chal-discoveryList-'+id).empty();
+                }
+
                 $(discElem).each(function(){
                     discovery.push(parseInt(String(this.match(/(ID:\ )\d+/g)).replace(/(ID:\ )/g, '')));
                 });
