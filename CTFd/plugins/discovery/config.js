@@ -1,8 +1,9 @@
-//         Modified CTFd/themes/admin/static/js/chalboard.js Functions
+//         Heavily Modified CTFd/themes/admin/static/js/chalboard.js Functions
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 function loadchals2(){
     $('#challenges2').empty();
+    $('#challenges2').append($('<button class="form-group btn btn-theme btn-outlined" id="submit-discoveryList2" onclick="updateALLdiscoveryList()" type="submit">Update</button><br><br>'));
     $.post(script_root + "/admin/chals", {
         'nonce': $('#nonce').val()
     }, function (data) {
@@ -21,16 +22,17 @@ function loadchals2(){
                         
                        var chalDisc = '<table class="discovery" id="discovery-{0}" value="{1}" cellspacing="0" cellpadding="0" style="display: inline-block;"></table></br></br></br></br>'.format(challenges['game'][k].id, challenges['game'][k].name);
                        $('#challenges2').append($(chalDisc));
-                       $('#discovery-'+challenges['game'][k].id).append('<tr><td><button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p>{2}</p></button></td>'.format(challenges['game'][k].id, challenges['game'][k].name, challenges['game'][k].value));
+                       $('#discovery-'+challenges['game'][k].id).append('<tr><td><button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p>{2}</p></button></td><td><div id="current-discoveryList-{0}"></div><div id="chal-discoveryList-{0}"></div>'.format(challenges['game'][k].id, challenges['game'][k].name, challenges['game'][k].value));
                       
-                       $('#discovery-'+challenges['game'][k].id).append(builddiscovery(challenges['game'][k].name));
+                       $('#discovery-'+challenges['game'][k].id).append(builddiscovery(challenges['game'][k].name, challenges['game'][k].id, challenges));
+
+                       //$('#discovery-'+challenges['game'][k].id).append($('</td></tr>'));
                     }
                 }
 
             }
             chalList.push([challenges['game'][i].id,challenges['game'][i].name])
         };
-        console.log(chalList[0][0]);
         
         
 
@@ -62,7 +64,7 @@ function loadchals2(){
 
                     discovery += "</span><a name='"+discoveryList[j].id+"'' class='delete-discovery'>&#215;</a></span></td>";
                     $('#discovery-'+discoveryList[j].chal).append(discovery);
-                };
+                }
                 $('.delete-discovery').click(function(e){
             	    deletediscovery(e.target.name);
                     $(e.target).parent().remove();
@@ -73,7 +75,7 @@ function loadchals2(){
             
         };
 
-        $('#challenges2 button').click(function (e) {
+        $('.chal-button').click(function (e) {
             id = this.value
             load_chal_template(id, function(){
                 openchal(id);
@@ -87,10 +89,14 @@ function loadchals2(){
 
 $(function(){
     loadchals2();
+    loadALLdiscoveryList();
 })
 
 //         Challenge Discovery JS
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+
 
 function loaddiscoveryList(){
     var chal = $('.chal-id').val();
@@ -141,19 +147,65 @@ function updatediscoveryList(){
     loaddiscoveryList(chal);
 }
 
+function updateALLdiscoveryList(){
+    discoveryList = [];
+
+    console.log("Beginning to update stuff");
+
+    $('.chal-button').each(function(){
+            discoveryList = [];
+	    chal = $(this).val();
+
+	    $('#chal-discoveryList-'+chal+' > span').each(function(i, e){
+		discoveryList.push($(e).text());
+	    });
+
+	    $.post(script_root + '/admin/discoveryList/'+chal, {'discoveryList':discoveryList, 'nonce': $('#nonce').val()})
+	    loaddiscoveryList(chal);
+    });
+    loadchals2();
+}
+
+function loadALLdiscoveryList(){
+
+    discoveryList = [];
+
+    $('.chal-button').each(function(){
+            var chal = $(this).val();
+
+	    $('#current-discoveryList-'+chal).empty();
+	    $('#chal-discoveryList-'+chal).empty();
+	    $.get(script_root + '/admin/discoveryList/' + chal, function(data){
+		discoveryList = $.parseJSON(JSON.stringify(data));
+		discoveryList = discoveryList['discoveryList'];
+		for (var i = 0; i < discoveryList.length; i++) {
+		    discovery = "<span class='label label-primary chal-discovery'><span>"+discoveryList[i].discovery+"</span><a name='"+discoveryList[i].id+"'' class='delete-discovery'>&#215;</a></span>";
+		    $('#current-discoveryList-'+chal).append(discovery);
+		};
+		$('.delete-discovery').click(function(e){
+		    deletediscovery(e.target.name);
+		    $(e.target).parent().remove();
+		});
+	    });
+    });
+}
+
+
+
+
 function deletediscovery(discoveryid){
     $.post(script_root + '/admin/discoveryList/' + discoveryid+'/delete', {'nonce': $('#nonce').val()});
     $(this).parent().remove();
 }
 
 $('#create-discovery').click(function(e){
-    elem = builddiscovery();
+    elem = builddiscovery1();
     $('#current-discoveryList').append(elem);
 });
 
 var discovery_dropdown=-1
 
-function builddiscovery(){
+function builddiscovery1(){
     var discoveryList = [];
     
     $('.chal-title').each(function(){
@@ -197,7 +249,7 @@ function builddiscovery(){
                 }
                 $(discElem).each(function(){
                     discovery.push(parseInt(String(this.match(/(ID:\ )\d+/g)).replace(/(ID:\ )/g, '')));
-                });
+                });loadALLdiscoveryList()
                 discovery=discovery.join('&');
                 
                 if (discovery.length > 0){
@@ -241,28 +293,24 @@ function builddiscovery(){
     return elem;
 }
 
-function builddiscovery(chal){
-
-    var discoveryList = [];
-    
-   
-    curChalNum = chal;
+function builddiscovery(chal, id, challenges){
+    //var discoveryList = []
 
     
     var elem = $('<div class="col-md-12 row current-discovery">');
-    discovery_dropdown += 1;
-    var this_disc_drop_id = discovery_dropdown;
     
-    var buttons = $('<div class="btn-group disc-drop" role="group">');
     var dropdown = $('<div class="btn-group dropdown" role="group">');
-    dropdown.append('<button class="btn btn-default dropdown-toggle" type="button" id="discovery_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><span class="chal-quantity">0</span> Challenges<span class="chal-plural">s</span> <span class="caret"></span></button>');
+    dropdown.append('<button class="btn btn-default dropdown-toggle" type="button" id="discovery_dropdown-' + id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><span class="chal-quantity">0</span> Challenges<span class="chal-plural">s</span> <span class="caret"></span></button>');
+
     var options = $('<ul class="dropdown-menu" aria-labelledby="discovery_dropdown">');
     dropdown.append(options);
+    var buttons = $('<div class="btn-group disc-drop" role="group">');
     buttons.append(dropdown);
     
-    $('.chal-button').each(function(){
-        if(this.firstChild.innerText != curChalNum){
-            add_discovery = $('<li class="discovery-item"><a href="#"><span class="fa fa-square-o" aria-hidden="true"></span><span class="fa fa-check-square-o" aria-hidden="true"></span> '+'ID: '+$(this).val()+'| name: '+this.firstChild.innerText+'</a></li>');
+    for (var s = 0; s <= challenges['game'].length - 1; s++) {
+        if(chal != challenges['game'][s].name){
+            add_discovery = $('<li class="discovery-item" value="'+id+'"><a href="#"><span class="fa fa-square-o" aria-hidden="true"></span><span class="fa fa-check-square-o" aria-hidden="true"></span> '+'ID: '+challenges['game'][s].id+'| name: '+challenges['game'][s].name+'</a></li>');
+            
             add_discovery.click(function(e){
                 if($(this).hasClass('active')){
                     $(this).removeClass('active');
@@ -290,12 +338,11 @@ function builddiscovery(chal){
                 discovery=discovery.join('&');
                 
                 if (discovery.length > 0){
-                    if($(String('.disc'+this_disc_drop_id)).length == 0){
-                        discovery = "<span class='label label-primary chal-discovery disc"+this_disc_drop_id+"'><span>"+discovery  ;                 
-                        $('#chal-discoveryList').append(discovery);
-                        // $('#chal-discoveryList')[this_disc_drop_id] = discovery;
+                    if($(String('.disc'+chal)).length == 0){
+                        discovery = "<span class='label label-primary chal-discovery disc"+chal+"'><span>"+discovery  ;                 
+                        $('#chal-discoveryList-'+$(this).val()).append(discovery);
                     } else{
-                        $(String('.disc'+this_disc_drop_id))[0].innerText=discovery;
+                        $(String('.disc'+chal))[0].innerText=discovery;
                     }
                     $('.discovery-insert').val("");
                 }
@@ -314,17 +361,19 @@ function builddiscovery(chal){
             add_discovery.append($("<input class='chal-link' type='hidden'>").val(chalid));
             options.append(add_discovery);
 
-            if($.inArray(chalid, discoveryList) > -1){
-                add_discovery.click();
-            }
+            //if($.inArray(chalid, discoveryList) > -1){
+             //   add_discovery.click();
+            //}
         }
-    });
+
+    }
+    
     
     if(options.children().length == 0){
       options.append('<li>&nbsp; No other Problems</li>');
     }
 
-    buttons.append('<a href="#" onclick="$(this).parent().parent().remove(); $(String(\'.disc'+String(this_disc_drop_id)+'\')).remove()" style="margin-right:-10px;" class="btn btn-danger pull-right discovery-remove-button">Remove</a>');
+    //buttons.append('<a href="#" onclick="$(this).parent().parent().remove(); $(String(\'.disc'+String(chal)+'\')).remove()" style="margin-right:-10px;" class="btn btn-danger pull-right discovery-remove-button">Remove</a></td></tr>');
     elem.append(buttons);
         
     return elem;
@@ -334,17 +383,17 @@ function builddiscovery(chal){
 $('#submit-discoveryList').click(function (e) {
     e.preventDefault();
     updatediscoveryList();
+    updateALLdiscoveryList();
     loadchals2();
 });
 
-$("#challenges").click(function(e) {
-    if(e.target.value > 0){
-	//$.get(script_root + '/admin/chals/' + id, function(obj){
-        //    console.log("Challenge: "+obj.name+" or: e.target.value + " has been opened")
-        //});
-        loaddiscoveryList(e.target.value)
-    }
+$('.submit-discoveryList2').click(function (e) {
+    e.preventDefault();
+    updateALLdiscoveryList();
+    loadchals2();
 });
+
+
 
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
