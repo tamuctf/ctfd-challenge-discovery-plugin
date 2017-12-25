@@ -1,11 +1,18 @@
 # CTFd-Challenge-Discovery-Plugin
-### V2.0.1 BETA
+### V2.0.2 BETA
 This is a CTFd platform plugin that allows for Challenge Discovery.
 
 # Challenge Discovery
 This will allow for certain problems to show up only after a predefined set of problems have been solved.
 
-*DISCLAIMER* This plugin is currently in development, but works. It is just a bit of a duct-tape User Interface right now
+Specifically, this plugin allows for an arbitrarily large number of 'ORed' sets of dependent problems before a problem is shown. This means that the problem will be shown when any predefined list of problems is solved by the viewing user.
+
+### Example
+The Dev Team has made Problem A be shown if either (Problem B AND Problem C) or if (Problem D) is solved. This means that a competitor will only need to solve either (B and C) or D for Problem A to be visible to them.
+
+
+### *DISCLAIMER*
+This plugin is currently in development, but works. It is just a bit of a duct-tape User Interface right now
 
 # Usage:
 There are two different functions this plugin has: Adding challenge-discovery information to a given challenge, and Deleting challenge-dsicvoery information from a given challenge.
