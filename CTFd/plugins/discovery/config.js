@@ -3,7 +3,7 @@
 
 function loadchals2(){
     $('#challenges2').empty();
-    $('#challenges2').append($('<button class="form-group btn btn-theme btn-outlined" id="submit-discoveryList2" onclick="updateALLdiscoveryList()" type="submit">Update</button><br><br>'));
+    $('#challenges2').append($('<button class="form-group btn btn-theme btn-outlined" id="submit-discoveryList2" onclick="updateALLdiscoveryList()" type="submit">Update All</button><br><br>'));
     $.post(script_root + "/admin/chals", {
         'nonce': $('#nonce').val()
     }, function (data) {
@@ -23,7 +23,7 @@ function loadchals2(){
                        var chalDisc = '<table class="discovery" id="discovery-{0}" value="{1}" cellspacing="0" cellpadding="0" style="display: inline-block;"></table></br></br></br></br>'.format(challenges['game'][k].id, challenges['game'][k].name);
                        $('#challenges2').append($(chalDisc));
 
-                       $('#discovery-'+challenges['game'][k].id).append('<tr id="disc-drop-'+challenges['game'][k].id+'"><td><button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p>{2}</p></button></td><td><div id="current-discoveryList-{0}" style="display: none;"></div><div id="chal-discoveryList-{0}" style="display: none;"></div>'.format(challenges['game'][k].id, challenges['game'][k].name, challenges['game'][k].value));
+                       $('#discovery-'+challenges['game'][k].id).append('<tr id="disc-drop-'+challenges['game'][k].id+'"><td><button class="chal-button col-md-2" style="background:grey;" value="{0}"><h5>{1}</h5><p>{2}</p><h3 style="display:none;padding-top:12px;padding-bottom:12px;margin-top:5px;">UPDATE</h3></button></td><td><div id="current-discoveryList-{0}" style="display: none;"></div><div id="chal-discoveryList-{0}" style="display: none;"></div>'.format(challenges['game'][k].id, challenges['game'][k].name, challenges['game'][k].value));
                       
                        $('#disc-drop-'+challenges['game'][k].id).append(builddiscovery(challenges['game'][k].name, challenges['game'][k].id, challenges));
 
@@ -85,6 +85,28 @@ function loadchals2(){
             //load_chal_template(id, function(){
             //    openchal(id);
             //});
+        });
+
+
+        $('.chal-button').mouseenter(function (e) {
+            id = this.value
+            
+            console.log("Hovered over:" + id)
+            //console.log($("#disc-drop-"+id+" p"))
+            $(this).css({"color": "white" , "background" : "red"})
+            $("#disc-drop-"+id+" p").hide()
+            $("#disc-drop-"+id+" h5").hide()
+            $("#disc-drop-"+id+" h3").show()
+        });
+        $('.chal-button').mouseleave(function (e) {
+            id = this.value
+            
+            console.log($(this))
+            //this.innerHTML=this.store;
+            $(this).css({"color" : "white", "background" : "grey"});
+            $("#disc-drop-"+id+" p").show()
+            $("#disc-drop-"+id+" h5").show()
+            $("#disc-drop-"+id+" h3").hide()
         });
 
     });
