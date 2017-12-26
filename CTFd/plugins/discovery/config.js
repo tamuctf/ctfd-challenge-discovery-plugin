@@ -3,7 +3,7 @@
 
 function loadchals2(){
     $('#challenges2').empty();
-    $('#challenges2').append($('<button class="form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit">Turn <span class="OFF">OFF</span><span class="ON">ON</span></button><br><br>'));
+    $('#challenges2').append($('<button class="OFF form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit" title="(Currently ON)" style="background-color: #ed8989;><p size="-8">Turn OFF</p></button><button class="ON form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit" title="(Currently OFF)" style="background-color: #89ed89;><p size="-8">Turn ON </p></button></span><br><br>'));
     $('#challenges2').append($('<button class="form-group btn btn-theme btn-outlined" id="submit-discoveryList2" onclick="updateALLdiscoveryList()" type="submit">Update All</button><br><br>'));
     $.post(script_root + "/admin/chals", {
         'nonce': $('#nonce').val()
@@ -79,7 +79,7 @@ function loadchals2(){
         $('.chal-button').click(function (e) {
             id = this.value
             updatediscoveryList2(id);
-            
+            loadStatus();
             
 
             //UNCOMMENT BELOW FOR DEBUGGING
