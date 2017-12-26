@@ -414,7 +414,7 @@ function builddiscovery(chal, id, challenges){
     
     for (var s = 0; s <= challenges['game'].length - 1; s++) { //Ording by ID, not category
         if(chal != challenges['game'][s].name){
-            add_discovery = $('<li class="discovery-item" value="'+id+'"><a href="#"><span class="fa fa-square-o" aria-hidden="true"></span><span class="fa fa-check-square-o" aria-hidden="true"></span> '+'ID: '+challenges['game'][s].id+'| name: '+challenges['game'][s].name+'</a></li>');
+            add_discovery = $('<li class="discovery-item" value="'+id+'" id="'+challenges['game'][s].id+'"><a href="#"><span class="fa fa-square-o" aria-hidden="true"></span><span class="fa fa-check-square-o" aria-hidden="true"></span> '+'ID: '+challenges['game'][s].id+'| name: '+challenges['game'][s].name+'</a></li>');
             
             add_discovery.click(function(e){
                 if($(this).hasClass('active')){
@@ -432,7 +432,7 @@ function builddiscovery(chal, id, challenges){
                 discElem=[];
                 discovery=[];
                 for(var i = 0; i < numActive; ++ i){
-                    var optionText = $(this).parent().find(".active")[i].innerText;
+                    var optionText = $(this).parent().find(".active")[i].id;
                     if(discElem.indexOf(optionText) == -1){
                         discElem.push(optionText);
                     }
@@ -443,7 +443,7 @@ function builddiscovery(chal, id, challenges){
                 }
 
                 $(discElem).each(function(){
-                    discovery.push(parseInt(String(this.match(/(ID:\ )\d+/g)).replace(/(ID:\ )/g, '')));
+                    discovery.push(parseInt(this))
                 });
                 discovery=discovery.join('&');
                 
