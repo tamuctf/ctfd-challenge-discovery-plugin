@@ -28,6 +28,7 @@ class DiscoveryList(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         chal = db.Column(db.Integer, db.ForeignKey('challenges.id'))
         discovery = db.Column(db.String(80))
+        service = db.String(80)
 
         def __init__(self, chal, discovery):
             self.chal = chal
@@ -35,6 +36,9 @@ class DiscoveryList(db.Model):
 
         def __repr__(self):
             return "{0}".format(self.chal)
+
+        def get_service(self, service):
+            return service
 
 
 def load(app):
@@ -48,6 +52,12 @@ def load(app):
     @admins_only
     def admin_discoveryList(chalid):
         if request.method == 'GET':
+            if chalid == 0:
+               service = DiscoveryList.query.filter_by(chal=chalid)
+               json_data = {'service': []}
+               for x in service:
+                   json_data['service'].append(x.discovery)
+               return jsonify(json_data)
             discoveryList = DiscoveryList.query.filter_by(chal=chalid).all()
             json_data = {'discoveryList': []}
             for x in discoveryList:
@@ -55,6 +65,12 @@ def load(app):
             return jsonify(json_data)
 
         elif request.method == 'POST':
+            if chalid == 0:
+                services = DiscoveryList.query.filter_by(chal=0)
+                for x in services:
+                    db.session.delete(x)
+                db.session.commit()
+
             newdiscoveryList = request.form.getlist('discoveryList[]')
             for x in newdiscoveryList:
                 discovery = DiscoveryList(chalid, x)
@@ -64,10 +80,10 @@ def load(app):
             return '1'
             
 
-    @discoveryList.route('/admin/discoveryList/<int:discoveryid>/delete', methods=['POST'])
+    @discoveryList.route('/admin/discoveryList/<int:discoveryid>/delete', methods=['POST', 'DELETE'])
     @admins_only
     def admin_delete_discoveryList(discoveryid):
-        if request.method == 'POST':
+        if request.method == 'POST' or request.method == 'DELETE':
             discovery = DiscoveryList.query.filter_by(id=discoveryid).first_or_404()
             db.session.delete(discovery)
             db.session.commit()
@@ -143,34 +159,38 @@ def load(app):
             
             
     def discovery(chals):
-        print("Testing")
-        print(chals)
+        #print("Testing")
+        #print(chals)
         #if is_admin():
         #    print("In Admin")
         #    return chals
+        for x in DiscoveryList.query.filter_by(chal=0):
+          if (x.discovery == "OFF"):
+              return chals
+
         discovered = []
         for x in chals:
           show, and_list = 0, []
-          print("Challenge #" + str(x.id) + " - Needed problems solved to be seen:")
+          #print("Challenge #" + str(x.id) + " - Needed problems solved to be seen:")
           for y in DiscoveryList.query.add_columns('id', 'discovery', 'chal').all(): # For each OR set
             if (str(y.chal) == str(x.id) and show != 1):
               and_list = map(int, (y.discovery).split('&'))
-              print("NEEDED: " + str(and_list))
+              #print("NEEDED: " + str(and_list))
               for need_solved in and_list: # For each AND elem
                 show = 2
                 for z in Solves.query.add_columns('chalid').filter_by(teamid=session['id']).all():
                   if need_solved == z.chalid:
                     show = 1 # Chal is solved and is needed
-                    print("Challenge ID: " + str(need_solved) + " has been solved & is needed")
+                    #print("Challenge ID: " + str(need_solved) + " has been solved & is needed")
                     break
                 if (show == 2): #Challenge is not solved and is needed
                   and_list=[] # Mark wrong
                   break
           if ((len(and_list)==0 and show == 0) or show==1):
-            print("Shown, because of:" + str(and_list) + " show:" + str(show) +'\n')
+            #print("Shown, because of:" + str(and_list) + " show:" + str(show) +'\n')
             discovered.append(x)
-          else:
-            print("HIDDEN, solved:" + str(and_list) + " show:" + str(show) +'\n')
+          #else:
+           # print("HIDDEN, solved:" + str(and_list) + " show:" + str(show) +'\n')
 
         print(chals)
         return discovered 

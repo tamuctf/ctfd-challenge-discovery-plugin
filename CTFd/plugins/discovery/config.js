@@ -3,6 +3,7 @@
 
 function loadchals2(){
     $('#challenges2').empty();
+    $('#challenges2').append($('<button class="form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit">Turn <span class="OFF">OFF</span><span class="ON">ON</span></button><br><br>'));
     $('#challenges2').append($('<button class="form-group btn btn-theme btn-outlined" id="submit-discoveryList2" onclick="updateALLdiscoveryList()" type="submit">Update All</button><br><br>'));
     $.post(script_root + "/admin/chals", {
         'nonce': $('#nonce').val()
@@ -16,7 +17,7 @@ function loadchals2(){
                 $('#challenges2').append($('<tr id="' + challenges['game'][i].category + '"><td class="col-md-1"><h2>' + challenges['game'][i].category + '</h2></td></tr>'))
                 categories.push(challenges['game'][i].category)
 
-                for (var k = 0; k <= challenges['game'].length - 1; k++) {
+                for (var k = challenges['game'].length - 1; k >= 0; k--) {
                     if (challenges['game'][k].category == challenges['game'][i].category) {
                         console.log("Challenge: " + challenges['game'][k].name + " was found to be in: " + challenges['game'][k].category);
                         
@@ -116,6 +117,7 @@ function loadchals2(){
 $(function(){
     loadchals2();
     loadALLdiscoveryList();
+    loadStatus();
 })
 
 //         Challenge Discovery JS
@@ -164,7 +166,7 @@ function updatediscoveryList(){
     discoveryList = [];
     chal = $('.chal-id').val();
     //console.log($('.chal-id').val());
-    //console.log($('#chal-discoveryList > span'));
+    //console.log($('#chal-discoveryList > span'));http://ctf/admin/discoveryList/0
     //console.log($('#chal-discoveryList'));
     $('#chal-discoveryList > span').each(function(i, e){
         discoveryList.push($(e).text());
@@ -172,6 +174,65 @@ function updatediscoveryList(){
     $.post(script_root + '/admin/discoveryList/'+chal, {'discoveryList':discoveryList, 'nonce': $('#nonce').val()})
     loaddiscoveryList(chal);
 }
+
+function updateStatus(){
+    loadStatus()
+    discoveryList = [];
+    
+    if ($(".OFF").css('display') == 'none'){
+        status = "OFF"
+        console.log("Service is off")
+    } else{
+        status = "ON"
+        console.log("Service is on")
+
+    }
+
+
+    if (status=="OFF"){
+        status = "ON";
+
+    } else {
+        status = "OFF";
+
+    }
+
+    discoveryList.push(status)
+
+
+    $.post(script_root + '/admin/discoveryList/0', {'discoveryList':discoveryList, 'nonce': $('#nonce').val(), 'id':"0"})
+    loadStatus()
+}
+
+function loadStatus(){
+    
+
+    $.get(script_root + '/admin/discoveryList/0', function(data){
+        var status =[];
+        status = $.parseJSON(JSON.stringify(data));
+        status = status['service'][0]
+        console.log(status)
+
+        if (status == ""){
+            status = "ON";
+        }
+        if (status == "ON"){
+            status = "OFF";
+            $(".OFF").show()
+            $(".ON").hide()
+        } else {
+            status = "ON";
+            $(".OFF").hide()
+            $(".ON").show()
+        }
+
+        return status;
+    });
+    
+
+    
+}
+
 
 function updateALLdiscoveryList(){
     discoveryList = [];
@@ -202,6 +263,8 @@ function updatediscoveryList2(chal){
     $('#chal-discoveryList-'+chal+' > span').each(function(i, e){
 	discoveryList.push($(e).text());
     });
+
+    console.log($('#chal-discoveryList-'+chal+' > span'))
 
     $.post(script_root + '/admin/discoveryList/'+chal, {'discoveryList':discoveryList, 'nonce': $('#nonce').val()})
     loaddiscoveryList(chal);
@@ -349,7 +412,7 @@ function builddiscovery(chal, id, challenges){
     var buttons = $('<div class="btn-group disc-drop" role="group">');
     buttons.append(dropdown);
     
-    for (var s = 0; s <= challenges['game'].length - 1; s++) {
+    for (var s = 0; s <= challenges['game'].length - 1; s++) { //Ording by ID, not category
         if(chal != challenges['game'][s].name){
             add_discovery = $('<li class="discovery-item" value="'+id+'"><a href="#"><span class="fa fa-square-o" aria-hidden="true"></span><span class="fa fa-check-square-o" aria-hidden="true"></span> '+'ID: '+challenges['game'][s].id+'| name: '+challenges['game'][s].name+'</a></li>');
             
