@@ -151,7 +151,7 @@ function quicksort(chals){
         var pivot = chals.pop()
 
         for(var i=0; i < chals.length; i++){
-            if(chals[i].value <= pivot.value){
+            if(chals[i].value >= pivot.value){
                 left.push(chals[i])
             } else {
                 right.push(chals[i])
