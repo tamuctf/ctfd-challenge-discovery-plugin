@@ -12,6 +12,32 @@ function loadchals2(){
         challenges = $.parseJSON(JSON.stringify(data));
         chalList = [];
 
+
+       //Inefficient code: Should have been done in loadchals2()
+       //-=-=-=-=-=-=-=-
+
+        chal_ordered = [];
+        categories2 = [];
+
+        for (var i = challenges['game'].length - 1; i >= 0; i--) {  //find all categories
+            if ($.inArray(challenges['game'][i].category, categories2) == -1) {
+               categories2.push(challenges['game'][i].category)
+               current_cat=[]
+               for (var k = challenges['game'].length - 1; k >= 0; k--) { //find all chals in each category
+                   if (challenges['game'][k].category == challenges['game'][i].category) {
+                       current_cat.push(challenges['game'][k])
+                   }
+               }
+               chal_ordered.push(...quicksort(current_cat))
+            }
+        }
+        console.log("Challenge Order")
+        console.log(chal_ordered)
+
+        //-=-=-=-=-=-=-=-
+
+
+
         for (var i = challenges['game'].length - 1; i >= 0; i--) {
             if ($.inArray(challenges['game'][i].category, categories) == -1) {
                 $('#challenges2').append($('<tr id="' + challenges['game'][i].category + '"><td class="col-md-1"><h2>' + challenges['game'][i].category + '</h2></td></tr>'))
@@ -26,7 +52,7 @@ function loadchals2(){
 
                        $('#discovery-'+challenges['game'][k].id).append('<tr id="disc-drop-'+challenges['game'][k].id+'"><td><button class="chal-button col-md-2" style="background:grey;" value="{0}"><h5>{1}</h5><p>{2}</p><h3 style="display:none;padding-top:12px;padding-bottom:12px;margin-top:5px;">UPDATE</h3></button></td><td><div id="current-discoveryList-{0}" style="display: none;"></div><div id="chal-discoveryList-{0}" style="display: none;"></div>'.format(challenges['game'][k].id, challenges['game'][k].name, challenges['game'][k].value));
                       
-                       $('#disc-drop-'+challenges['game'][k].id).append(builddiscovery(challenges['game'][k].name, challenges['game'][k].id, challenges));
+                       $('#disc-drop-'+challenges['game'][k].id).append(builddiscovery(challenges['game'][k].name, challenges['game'][k].id, chal_ordered));
 
                        $('#disc-drop-'+challenges['game'][k].id).append($('</td></tr>'));
                     }
@@ -66,7 +92,7 @@ function loadchals2(){
 
                     discovery += "</span><a name='"+discoveryList[j].id+"'' class='delete-discovery' id='"+ discoveryList[j].chal +"'>&#215;</a></span></td>";
                     $('#discovery-'+discoveryList[j].chal).append(discovery);
-                }
+                }categories
                 $('.delete-discovery').click(function(e){
             	    deletediscovery(e.target.name);
                     $(e.target).parent().remove();
@@ -124,6 +150,25 @@ $(function(){
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
+//Reference: https://www.w3resource.com/javascript-exercises/searching-and-sorting-algorithm/searching-and-sorting-algorithm-exercise-1.php
+function quicksort(chals){
+    if(chals.length >= 1){
+        var left = []
+        var right = []
+        var ordered = []
+        var pivot = chals.pop()
+
+        for(var i=0; i < chals.length; i++){
+            if(chals[i].value <= pivot.value){
+                left.push(chals[i])
+            } else {
+                right.push(chals[i])
+            }
+        }
+        return ordered.concat(quicksort(left), pivot, quicksort(right));
+    }
+    return chals
+}
 
 
 function loaddiscoveryList1(){
@@ -226,7 +271,7 @@ function loadStatus(){
             $(".ON").show()
         }
 
-        return status;
+        return status;categories
     });
     
 
@@ -411,10 +456,11 @@ function builddiscovery(chal, id, challenges){
     dropdown.append(options);
     var buttons = $('<div class="btn-group disc-drop" role="group">');
     buttons.append(dropdown);
+
     
-    for (var s = 0; s <= challenges['game'].length - 1; s++) { //Ording by ID, not category
-        if(chal != challenges['game'][s].name){
-            add_discovery = $('<li class="discovery-item" value="'+id+'" id="'+challenges['game'][s].id+'"><a href="#"><span class="fa fa-square-o" aria-hidden="true"></span><span class="fa fa-check-square-o" aria-hidden="true"></span> '+'ID: '+challenges['game'][s].id+'| name: '+challenges['game'][s].name+'</a></li>');
+    for (var s = 0; s <= challenges.length - 1; s++) { //Ording by ID, not category
+        if(chal != challenges[s].name){
+            add_discovery = $('<li class="discovery-item" value="'+id+'" id="'+challenges[s].id+'"><a href="#"><span class="fa fa-square-o" aria-hidden="true"></span><span class="fa fa-check-square-o" aria-hidden="true"></span> '+'Category: '+challenges[s].category+' | Name: '+challenges[s].name+' | Points: '+challenges[s].value+'</a></li>');
             
             add_discovery.click(function(e){
                 if($(this).hasClass('active')){
@@ -467,13 +513,9 @@ function builddiscovery(chal, id, challenges){
                 e.stopPropagation();
             })
             add_discovery.find('.fa-check-square-o').hide();
-            var chalid = parseInt($(this).find('.chal-button').value);
-            add_discovery.append($("<input class='chal-link' type='hidden'>").val(chalid));
+            add_discovery.append($("<input class='chal-link' type='hidden'>").val(id));
             options.append(add_discovery);
 
-            //if($.inArray(chalid, discoveryList) > -1){
-             //   add_discovery.click();
-            //}
         }
 
     }
