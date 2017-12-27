@@ -113,6 +113,62 @@ def load(app):
             return '1'
             
 
+    @discoveryList.route('/admin/discoveryList/<string:auto>', methods=['GET'])
+    @admins_only
+    def admin_AutoDiscovery(auto):
+        if request.method == 'GET':
+            json_data = {'Challenge': [], 'Dependent Challenges': [[]]}
+            if auto == "cat": #Simple Auto Discovery
+               #Challenges appear after the previous challenge in category was solved 
+
+               chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
+               for x in chals:
+                   json_data['Challenge'].append(x.id)
+                   chals_cat = [chal for chal in chals if (chal != x and chal.value <= x.value and chal.category == x.category)]
+                   if len(chals_cat) > 0:
+                       chals_cat = chals_cat[-1].id
+
+                   json_data['Dependent Challenges'].append(chals_cat)
+
+            elif auto == "auto": #Broader Auto Discovery (Challenges become visible more easily)
+               chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
+               for x in chals:
+                   starter = [chal for chal in chals if (chal != x and chal.value < x.value and chal.category == x.category)]
+                   current_challenges = [[]]
+
+                   if len(starter) > 0: # First Challenge in Category - Visible by default
+                        
+                       second_last_elem=[]
+                       json_data['Challenge'].append(x.id)
+                       chals_cat = [chal for chal in chals if (chal != x and chal.value <= x.value and chal.category == x.category)]
+                       if len(chals_cat) > 0:
+                           current_challenges.append(chals_cat[-1].id)
+                           if len(chals_cat) > 1:
+                               print(chals_cat[-2])
+                               print(chals_cat[-2].id)
+                               second_last_elem = chals_cat[-2].id
+
+                       chals_not_cat = [chal for chal in chals if (chal != x and chal.value > x.value and chal.category != x.category)]
+                       categories = []
+                       for y in chals_not_cat:
+                           if y.category not in categories:
+                                categories.append(y.category)
+                                current_cat = [chal for chal in chals_not_cat if (chal.value >= y.value and chal.category == y.category)]
+                                for z in current_cat:
+                                    print("Challenge:" + x.name + "2nd" + str(second_last_elem) + " : " + str(z.id))
+                                    current_challenges.append((second_last_elem,z.id))
+                            
+                   
+
+                   json_data['Dependent Challenges'].append(current_challenges)
+
+
+            else:
+                return "This method is not allowed"
+    
+            return jsonify(json_data)
+
+
     @discoveryList.route('/admin/discoveryList/<int:discoveryid>/delete', methods=['POST', 'DELETE'])
     @admins_only
     def admin_delete_discoveryList(discoveryid):
