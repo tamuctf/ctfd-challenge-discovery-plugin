@@ -78,21 +78,19 @@ def load(app):
 
                 for x in services:
                     db.session.delete(x)
-                db.session.commit()
+                    db.session.commit()
 
                 service = request.form.getlist('service[]')
                 autoDiscovery = request.form.getlist('auto[]')
 
                 for x in service:
-                    print("Service:")
                     discovery = DiscoveryList(chalid, x)
                     db.session.add(discovery)
-                    for x in json_data['auto']:
-                        discovery = DiscoveryList(chalid, x)
+                    for y in json_data['auto']:
+                        discovery = DiscoveryList(chalid, y)
                         db.session.add(discovery)
-
+                    
                 for x in autoDiscovery:
-                    print("Auto:")
                     discovery = DiscoveryList(chalid, x)
                     db.session.add(discovery)
                     for x in json_data['service']:
@@ -108,12 +106,8 @@ def load(app):
             discoveryList = DiscoveryList.query.filter_by(chal=chalid).all()
 
             for x in newdiscoveryList:
-                print("New Disc:")
-                print(x)
                 skip=0
                 for y in discoveryList:
-                    print("Previous")
-                    print(y.discovery)
                     if x == y.discovery:
                         skip = 1;
                 if skip == 0:
@@ -184,8 +178,9 @@ def load(app):
     @admins_only
     def admin_delete_discoveryList(discoveryid):
         if request.method == 'POST' or request.method == 'DELETE':
-            discovery = DiscoveryList.query.filter_by(id=discoveryid).first_or_404()
-            db.session.delete(discovery)
+            discovery = DiscoveryList.query.filter_by(id=discoveryid)
+            for x in discovery:
+                db.session.delete(x)
             db.session.commit()
             db.session.close()
             return '1'

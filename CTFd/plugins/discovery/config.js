@@ -3,8 +3,6 @@
 
 function loadchals2(){
     $('#challenges2').empty();
-    //$('#challenges2').append($('<button class="OFF form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit" title="(Currently ON)" style="background-color: #ed8989;display: none;"><p size="-8">Turn OFF</p></button><button class="ON form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit" title="(Currently OFF)" style="background-color: #89ed89;display: none;"><p size="-8">Turn ON </p></button></span><br><br>'));
-    //$('#challenges2').append($('<button class="form-group btn btn-theme btn-outlined" id="submit-discoveryList2" onclick="updateALLdiscoveryList()" type="submit">Update All</button><br><br>'));
     $('#challenges2').append($('<span title="Toggle Challenge Discovery"><label class="switch"><input id="check" type="checkbox" onclick="updateStatus()"><span class="slider"></span></label></span>'))
     $('#challenges2').append($('<span title="Auto Discovery"><label class="switch"><input id="auto" type="checkbox" onclick="updateAuto()"><span class="slider"></span></label></span>'))
     
@@ -103,14 +101,9 @@ function loadchals2(){
 
         $('.chal-button').click(function (e) {
             id = this.value
-            updatediscoveryList2(id);
+            updatediscoveryList(id);
+            loadAuto();
             loadStatus();
-            
-
-            //UNCOMMENT BELOW FOR DEBUGGING
-            //load_chal_template(id, function(){
-            //    openchal(id);
-            //});
         });
 
 
@@ -255,6 +248,8 @@ function updateAuto(){
             }
                
         });
+        loadchals2();
+        loadStatus();
 
     } else{
         status = "autoOFF";
@@ -264,6 +259,7 @@ function updateAuto(){
 
     $.post(script_root + '/admin/discoveryList/0', {'auto':auto, 'nonce': $('#nonce').val(), 'id':"0"})
     loadAuto()
+    loadStatus()
 }
 
 function loadAuto(){
@@ -286,29 +282,7 @@ function loadAuto(){
         
 }
 
-
-
-
-function updateALLdiscoveryList(){
-    discoveryList = [];
-
-    console.log("Updating ALL of Discovery");
-
-    $('.chal-button').each(function(){
-            discoveryList = [];
-	    chal = $(this).val();
-
-	    $('#chal-discoveryList-'+chal+' > span').each(function(i, e){
-		discoveryList.push($(e).text());
-	    });
-
-	    $.post(script_root + '/admin/discoveryList/'+chal, {'discoveryList':discoveryList, 'nonce': $('#nonce').val()})
-	    loaddiscoveryList(chal);
-    });
-    loadchals2();
-}
-
-function updatediscoveryList2(chal){
+function updatediscoveryList(chal){
     discoveryList = [];
 
     $('#chal-discoveryList-'+chal+' > span').each(function(i, e){
@@ -316,6 +290,7 @@ function updatediscoveryList2(chal){
     });
 
     $.post(script_root + '/admin/discoveryList/'+chal, {'discoveryList':discoveryList, 'nonce': $('#nonce').val()})
+    $.post(script_root + '/admin/discoveryList/0', {'auto':["autoOFF"], 'nonce': $('#nonce').val()})
     loaddiscoveryList(chal);
     loadchals2();
 }
@@ -439,15 +414,6 @@ function builddiscovery(chal, id, challenges){
         
     return elem;
 }
-
-$('.submit-discoveryList2').click(function (e) {
-    e.preventDefault();
-    updateALLdiscoveryList();
-    loadchals2();
-});
-
-
-
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
