@@ -190,6 +190,7 @@ function updateStatus(){
     
     if (document.getElementById("check").checked){
         status = "ON";
+        
     } else{
         status = "OFF";
     }
@@ -226,6 +227,35 @@ function updateAuto(){
     
     if (document.getElementById("auto").checked){
         status = "autoON";
+
+        $.get(script_root + '/admin/discoveryList/' + 'auto', function(data){
+            var status =[];
+            status = $.parseJSON(JSON.stringify(data));
+            Challenges = status['Challenge'];
+            Discovery = status['Dependent Challenges'];
+
+
+            for (var i=0; i < Challenges.length; i++){ 
+                discoveryList=[]
+                for (var x=0; x< Discovery[Challenges[i]].length; x++){
+                    var cur = Discovery[Challenges[i]][x]
+                    
+                    if (cur.length > 1){
+                        cur = cur.filter(function(n){ return n != undefined && n != ''})
+                        cur = cur.join('&')
+                    } else if(cur.length == 0){
+                        cur = []
+                    }
+
+                    discoveryList.push(Discovery[Challenges[i]][x])
+                }
+                
+
+                $.post(script_root + '/admin/discoveryList/'+Challenges[i], {'discoveryList':discoveryList, 'nonce': $('#nonce').val()})
+            }
+               
+        });
+
     } else{
         status = "autoOFF";
     }

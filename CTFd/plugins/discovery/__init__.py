@@ -105,9 +105,20 @@ def load(app):
 
 
             newdiscoveryList = request.form.getlist('discoveryList[]')
+            discoveryList = DiscoveryList.query.filter_by(chal=chalid).all()
+
             for x in newdiscoveryList:
-                discovery = DiscoveryList(chalid, x)
-                db.session.add(discovery)
+                print("New Disc:")
+                print(x)
+                skip=0
+                for y in discoveryList:
+                    print("Previous")
+                    print(y.discovery)
+                    if x == y.discovery:
+                        skip = 1;
+                if skip == 0:
+                    discovery = DiscoveryList(chalid, x)
+                    db.session.add(discovery)
             db.session.commit()
             db.session.close()
             return '1'
@@ -118,7 +129,7 @@ def load(app):
     def admin_AutoDiscovery(auto):
         if request.method == 'GET':
             json_data = {'Challenge': [], 'Dependent Challenges': [[]]}
-            if auto == "cat": #Simple Auto Discovery
+            if auto == "basic": #Simple Auto Discovery
                #Challenges appear after the previous challenge in category was solved 
 
                chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
