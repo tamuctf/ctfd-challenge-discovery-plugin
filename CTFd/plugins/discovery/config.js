@@ -3,8 +3,10 @@
 
 function loadchals2(){
     $('#challenges2').empty();
-    $('#challenges2').append($('<button class="OFF form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit" title="(Currently ON)" style="background-color: #ed8989;display: none;"><p size="-8">Turn OFF</p></button><button class="ON form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit" title="(Currently OFF)" style="background-color: #89ed89;display: none;"><p size="-8">Turn ON </p></button></span><br><br>'));
+    //$('#challenges2').append($('<button class="OFF form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit" title="(Currently ON)" style="background-color: #ed8989;display: none;"><p size="-8">Turn OFF</p></button><button class="ON form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit" title="(Currently OFF)" style="background-color: #89ed89;display: none;"><p size="-8">Turn ON </p></button></span><br><br>'));
     //$('#challenges2').append($('<button class="form-group btn btn-theme btn-outlined" id="submit-discoveryList2" onclick="updateALLdiscoveryList()" type="submit">Update All</button><br><br>'));
+    $('#challenges2').append($('<span title="Toggle Challenge Discovery"><label class="switch"><input id="check" type="checkbox" onclick="updateStatus()"><span class="slider"></span></label></span>'))
+    
     $.post(script_root + "/admin/chals", {
         'nonce': $('#nonce').val()
     }, function (data) {
@@ -184,12 +186,11 @@ function updateStatus(){
     loadStatus()
     discoveryList = [];
     
-    if ($(".OFF").css('display') == 'none'){
+    if (document.getElementById("check").checked){
         status = "ON";
     } else{
         status = "OFF";
     }
-
 
     discoveryList.push(status)
 
@@ -207,13 +208,9 @@ function loadStatus(){
             status = "ON";
         }
         if (status == "ON"){
-            status = "OFF";
-            $(".OFF").show()
-            $(".ON").hide()
+            document.getElementById("check").checked = true;
         } else {
-            status = "ON";
-            $(".OFF").hide()
-            $(".ON").show()
+            document.getElementById("check").checked = false;
         }
 
         return status;
