@@ -28,7 +28,6 @@ class DiscoveryList(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         chal = db.Column(db.Integer, db.ForeignKey('challenges.id'))
         discovery = db.Column(db.String(80))
-        service = db.String(80)
 
         def __init__(self, chal, discovery):
             self.chal = chal
@@ -37,8 +36,6 @@ class DiscoveryList(db.Model):
         def __repr__(self):
             return "{0}".format(self.chal)
 
-        def get_service(self, service):
-            return service
 
 
 def load(app):
@@ -54,9 +51,12 @@ def load(app):
         if request.method == 'GET':
             if chalid == 0:
                service = DiscoveryList.query.filter_by(chal=chalid)
-               json_data = {'service': []}
+               json_data = {'service': [], 'auto': []}
                for x in service:
-                   json_data['service'].append(x.discovery)
+                   if x.discovery == "OFF" or x.discovery == "ON":
+                       json_data['service'].append(x.discovery)
+                   else:
+                       json_data['auto'].append(x.discovery)
                return jsonify(json_data)
             discoveryList = DiscoveryList.query.filter_by(chal=chalid).all()
             json_data = {'discoveryList': []}
@@ -67,9 +67,42 @@ def load(app):
         elif request.method == 'POST':
             if chalid == 0:
                 services = DiscoveryList.query.filter_by(chal=0)
+
+                previous = DiscoveryList.query.filter_by(chal=chalid)
+                json_data = {'service': [], 'auto': []}
+                for x in previous:
+                    if x.discovery == "OFF" or x.discovery == "ON":
+                        json_data['service'].append(x.discovery)
+                    else:
+                        json_data['auto'].append(x.discovery)
+
                 for x in services:
                     db.session.delete(x)
                 db.session.commit()
+
+                service = request.form.getlist('service[]')
+                autoDiscovery = request.form.getlist('auto[]')
+
+                for x in service:
+                    print("Service:")
+                    discovery = DiscoveryList(chalid, x)
+                    db.session.add(discovery)
+                    for x in json_data['auto']:
+                        discovery = DiscoveryList(chalid, x)
+                        db.session.add(discovery)
+
+                for x in autoDiscovery:
+                    print("Auto:")
+                    discovery = DiscoveryList(chalid, x)
+                    db.session.add(discovery)
+                    for x in json_data['service']:
+                        discovery = DiscoveryList(chalid, x)
+                        db.session.add(discovery)
+
+                db.session.commit()
+                db.session.close()
+                return '1'
+
 
             newdiscoveryList = request.form.getlist('discoveryList[]')
             for x in newdiscoveryList:

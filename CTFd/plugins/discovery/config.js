@@ -6,6 +6,7 @@ function loadchals2(){
     //$('#challenges2').append($('<button class="OFF form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit" title="(Currently ON)" style="background-color: #ed8989;display: none;"><p size="-8">Turn OFF</p></button><button class="ON form-group btn btn-theme btn-outlined" id="submit-status" onclick="updateStatus()" type="submit" title="(Currently OFF)" style="background-color: #89ed89;display: none;"><p size="-8">Turn ON </p></button></span><br><br>'));
     //$('#challenges2').append($('<button class="form-group btn btn-theme btn-outlined" id="submit-discoveryList2" onclick="updateALLdiscoveryList()" type="submit">Update All</button><br><br>'));
     $('#challenges2').append($('<span title="Toggle Challenge Discovery"><label class="switch"><input id="check" type="checkbox" onclick="updateStatus()"><span class="slider"></span></label></span>'))
+    $('#challenges2').append($('<span title="Auto Discovery"><label class="switch"><input id="auto" type="checkbox" onclick="updateAuto()"><span class="slider"></span></label></span>'))
     
     $.post(script_root + "/admin/chals", {
         'nonce': $('#nonce').val()
@@ -138,6 +139,7 @@ $(function(){
     loadchals2();
     loadALLdiscoveryList();
     loadStatus();
+    loadAuto();
 })
 
 //         Challenge Discovery JS
@@ -184,7 +186,7 @@ function loaddiscoveryList(chal){
 
 function updateStatus(){
     loadStatus()
-    discoveryList = [];
+    service = [];
     
     if (document.getElementById("check").checked){
         status = "ON";
@@ -192,10 +194,10 @@ function updateStatus(){
         status = "OFF";
     }
 
-    discoveryList.push(status)
+    service.push(status)
 
-    $.post(script_root + '/admin/discoveryList/0', {'discoveryList':discoveryList, 'nonce': $('#nonce').val(), 'id':"0"})
-    loadStatus()
+    $.post(script_root + '/admin/discoveryList/0', {'service':service, 'nonce': $('#nonce').val(), 'id':"0"})
+    loadStatus();
 }
 
 function loadStatus(){
@@ -217,6 +219,44 @@ function loadStatus(){
     });
         
 }
+
+function updateAuto(){
+    loadAuto()
+    auto = [];
+    
+    if (document.getElementById("auto").checked){
+        status = "autoON";
+    } else{
+        status = "autoOFF";
+    }
+
+    auto.push(status)
+
+    $.post(script_root + '/admin/discoveryList/0', {'auto':auto, 'nonce': $('#nonce').val(), 'id':"0"})
+    loadAuto()
+}
+
+function loadAuto(){
+    $.get(script_root + '/admin/discoveryList/0', function(data){
+        var status =[];
+        status = $.parseJSON(JSON.stringify(data));
+        status = status['auto'][0]
+
+        if (status == ""){
+            status = "autoOFF";
+        }
+        if (status == "autoON"){
+            document.getElementById("auto").checked = true;
+        } else {
+            document.getElementById("auto").checked = false;
+        }
+
+        return status;
+    });
+        
+}
+
+
 
 
 function updateALLdiscoveryList(){
