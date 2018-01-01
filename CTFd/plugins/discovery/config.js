@@ -118,6 +118,7 @@ function loadchals2(){
         });
 
     });
+ 
 }
 
 
@@ -125,11 +126,15 @@ $(function(){
     loadchals2();
     loadALLdiscoveryList();
     loadStatus();
-    //loadAuto();
 })
 
 //         Challenge Discovery JS
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+function scrolling(id){
+  setTimeout(function(){ document.getElementById("disc-drop-"+id).scrollIntoView(); }, 0);
+}
 
 
 //Reference: https://www.w3resource.com/javascript-exercises/searching-and-sorting-algorithm/searching-and-sorting-algorithm-exercise-1.php
@@ -374,9 +379,9 @@ function builddiscovery(chal, id, challenges){
     buttons.append(dropdown);
 
     
-    for (var s = 0; s <= challenges.length - 1; s++) { //Ording by ID, not category
+    for (var s = 0; s <= challenges.length - 1; s++) { //ordered by points and seperated into categories
         if(chal != challenges[s].name){
-            add_discovery = $('<li class="discovery-item" value="'+id+'" id="'+challenges[s].id+'"><a href="#"><span class="fa fa-square-o" aria-hidden="true"></span><span class="fa fa-check-square-o" aria-hidden="true"></span> '+'Category: '+challenges[s].category+' | Name: '+challenges[s].name+' | Points: '+challenges[s].value+'</a></li>');
+            add_discovery = $('<li class="discovery-item drop-'+ id +'" value="'+id+'" id="'+challenges[s].id+'" onclick="setTimeout(scrolling('+id+'), 0);"><a href="#"><span class="fa fa-square-o" aria-hidden="true"></span><span class="fa fa-check-square-o" aria-hidden="true"></span> '+'Category: '+challenges[s].category+' | Name: '+challenges[s].name+' | Points: '+challenges[s].value+'</a></li>');
             
             add_discovery.click(function(e){
                 if($(this).hasClass('active')){
@@ -426,12 +431,12 @@ function builddiscovery(chal, id, challenges){
                 else {
                     $(this).parent().parent().find(".chal-plural").html("s");
                 }
+
                 e.stopPropagation();
             })
             add_discovery.find('.fa-check-square-o').hide();
             add_discovery.append($("<input class='chal-link' type='hidden'>").val(id));
             options.append(add_discovery);
-
         }
 
     }
