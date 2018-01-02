@@ -5,7 +5,8 @@ function loadchals2(){
     $('#challenges2').empty();
     $('#challenges2').append($('<center><span title="Toggle Challenge Discovery"><label class="switch"><input id="check" type="checkbox" onclick="updateStatus()"><span class="slider"></span></label></span></center>'))
     //$('#challenges2').append($('<span title="Auto Discovery" style="display:none"><label class="switch"><input id="auto" type="checkbox" onclick="updateAuto()"><span class="slider"></span></label></span>'))
-    $('#challenges2').append($('<span title="Auto Discovery"><button class="chal-button2 col-md-2 " style="background:lightblue;border-radius: 50%;" onclick="updateAuto2()"><h3>Add</h3><h5>Auto-Discovery</h5></button></span>'))
+    $('#challenges2').append($('<span title="Auto Discovery"><button class="auto-button col-md-2 " style="background:lightblue;border-radius: 50%;" onclick="updateAuto2()"><h3>Add</h3><h5>Auto-Discovery</h5></button></span>'))
+    $('#challenges2').append($('<span title="Are you sure?"><button class="delete-button col-md-2 " style="background: rgb(222, 139, 136);border-radius: 50%;color:white;" onclick="deleteAll()"><span class="delete-off"><h3>Delete</h3><h5>All Discovery Sets</h5></span><span class="delete-on" style="display:none;"><h3>DELETE</h3><h5>EVERYTHING?</h5></span></button></span>'))
     $.post(script_root + "/admin/chals", {
         'nonce': $('#nonce').val()
     }, function (data) {
@@ -65,7 +66,7 @@ function loadchals2(){
                       }
                   
  
-                      discovery = "<td style='background-color: #4bcdcd; border: 1px solid #dddddd;'><span class='chal-discovery discovery-"+ (discoveryList[j].chal) + "' value='"+ discoveryList[j].chal +"'>"
+                      discovery = "<td style='background-color: #4bcdcd; auto-buttonborder: 1px solid #dddddd;'><span class='chal-discovery discovery-"+ (discoveryList[j].chal) + "' value='"+ discoveryList[j].chal +"'>"
                    
                       for (var k=0; k < andSet.length; k++){
                           discovery += "<p style='color:red;'>"+andSet[k]+"</p>"
@@ -110,11 +111,21 @@ function loadchals2(){
             $("#disc-drop-"+id+" h3").hide()
         });
 
-        $('.chal-button2').mouseenter(function (e) {           
+        $('.auto-button').mouseenter(function (e) {           
             $(this).css({"color": "white" , "background" : "red"})
         });
-        $('.chal-button2').mouseleave(function (e) {
+        $('.auto-button').mouseleave(function (e) {
             $(this).css({"color" : "black", "background" : "lightblue"});
+        });
+        $('.delete-button').mouseenter(function (e) {           
+            $(this).css({"color": "white" , "background" : "#c83232"})
+            $('.delete-off').hide()
+            $('.delete-on').show()
+        });
+        $('.delete-button').mouseleave(function (e) {
+            $(this).css({"color" : "#f5eeed", "background" : "#de8b88"});
+            $('.delete-on').hide()
+            $('.delete-off').show()
         });
 
     });
@@ -144,6 +155,8 @@ function quicksort(chals){
         var right = []
         var ordered = []
         var pivot = chals.pop()
+    loadALLdiscoveryList();
+    loadStatus();
 
         for(var i=0; i < chals.length; i++){
             if(chals[i].value >= pivot.value){
@@ -173,6 +186,13 @@ function loaddiscoveryList(chal){
             $(e.target).parent().remove();
         });
     });
+}
+
+function deleteAll(){
+    $.post(script_root + '/admin/discoveryList/delete', {'service':['delete'], 'nonce': $('#nonce').val(), 'id':"0"})
+    loadchals2();
+    loadALLdiscoveryList();
+    loadStatus();
 }
 
 function updateStatus(){

@@ -118,7 +118,7 @@ def load(app):
             return '1'
             
 
-    @discoveryList.route('/admin/discoveryList/<string:auto>', methods=['GET'])
+    @discoveryList.route('/admin/discoveryList/<string:auto>', methods=['GET', 'POST'])
     @admins_only
     def admin_AutoDiscovery(auto):
         if request.method == 'GET':
@@ -173,6 +173,17 @@ def load(app):
     
             return jsonify(json_data)
 
+        if request.method == 'POST':
+            if auto == "delete":
+                discovery = DiscoveryList.query.filter(id != 0).all()
+                print discovery
+                for x in discovery:
+                    db.session.delete(x)
+                db.session.commit()
+                db.session.close()
+                return '1'
+                
+
 
     @discoveryList.route('/admin/discoveryList/<int:discoveryid>/delete', methods=['POST', 'DELETE'])
     @admins_only
@@ -184,7 +195,6 @@ def load(app):
             db.session.commit()
             db.session.close()
             return '1'
-            openchal
     #@admin.route('/admin/chal/delete', methods=['POST'])
     #@admins_only
     #def admin_delete_chal():
