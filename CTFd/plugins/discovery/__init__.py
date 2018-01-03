@@ -162,11 +162,19 @@ def load(app):
                                 for z in current_cat:
                                     print("Challenge:" + x.name + "2nd" + str(second_last_elem) + " : " + str(z.id))
                                     current_challenges.append((second_last_elem,z.id))
-                            
-                   
+
 
                    json_data['Dependent Challenges'].append(current_challenges)
+            elif auto == "preview":
+                hidden = DiscoveryList.query.filter_by(chal="preview")
+                json_data = {'hidden': [], 'solved':[]}
+                for x in hidden:
+                    json_data['hidden'].append(x.discovery)
+                solved = DiscoveryList.query.filter_by(chal="solved")
+                for x in solved:
+                    json_data['solved'].append(x.discovery)
 
+                return jsonify(json_data)
 
             else:
                 return "This method is not allowed"
@@ -182,6 +190,75 @@ def load(app):
                 db.session.commit()
                 db.session.close()
                 return '1'
+            if auto == "preview":
+                previous = DiscoveryList.query.filter_by(chal="preview")
+                for x in previous:
+                    db.session.delete(x)
+                
+                previous = DiscoveryList.query.filter_by(chal="solved")
+                for x in previous:
+                    db.session.delete(x)
+            
+                db.session.commit()
+
+                solved = request.form.getlist('solved[]')
+                for y in solved:
+                    discovery = DiscoveryList('solved', y)
+                    db.session.add(discovery)
+                    db.session.commit()
+
+                visible = []
+                hidden = []
+                if len(solved) > 0:
+                    solved = solved[0].split("&")                
+                    
+                  
+                    allDiscovery = DiscoveryList.query.filter(id != 0).all()
+                    for x in allDiscovery:
+                        if x.chal != 0:
+                            #print('x.chal: ' + str(x.chal) + 'solved: ' + str(solved))
+                            if str(x.chal) in solved:
+                                visible.append(x.chal)
+                            else:
+                                discovery = filter(None, (' '.join(y.split("&")).split() for y in x.discovery))
+                                discovery = [item for sublist in discovery for item in sublist]
+                                #print discovery
+                                current_visible=1
+                                #print("Challenge: " + str(x.chal) +" Set:")
+                                for y in discovery:
+                                    if y[0] not in solved:
+                                        current_visible=0
+                                        break;
+                                if(current_visible==1):
+                                    visible.append(x.chal)
+                                else:
+                                    hidden.append(x.chal)
+
+                else:
+                    allDiscovery = DiscoveryList.query.filter(id != 0).all()
+                    for x in allDiscovery:
+                        if x.chal != 0:
+                            discovery = filter(None, (' '.join(y.split("&")).split() for y in x.discovery))
+                            discovery = [item for sublist in discovery for item in sublist]
+                            if(len(discovery)>0):
+                                hidden.append(x.chal)
+                            else:
+                                visible.append(x.chal)
+
+                hidden = [x for x in hidden if x not in visible]
+                #print('visible: '+str(visible))
+                #print('hidden: '+str(hidden))
+                
+                json_data = {'visible': visible, 'hidden': hidden}
+  
+                for y in hidden:
+                    discovery = DiscoveryList('preview', y)
+                    db.session.add(discovery)         
+ 
+                db.session.commit()
+                db.session.close()
+                return '1'
+               
                 
 
 
