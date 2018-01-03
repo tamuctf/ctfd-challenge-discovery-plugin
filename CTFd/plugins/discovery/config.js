@@ -5,10 +5,10 @@ function loadchals2(){
     $('#challenges2').empty();
     $('#challenges2').append($('<center><span title="Toggle Challenge Discovery"><label class="switch"><input id="check" type="checkbox" onclick="updateStatus()"><span class="slider"></span></label></span></center>'))
     //$('#challenges2').append($('<span title="Auto Discovery" style="display:none"><label class="switch"><input id="auto" type="checkbox" onclick="updateAuto()"><span class="slider"></span></label></span>'))
-    $('#challenges2').append($('<span title="Auto Discovery"><button class="auto-button col-md-2 " style="background:lightblue;border-radius: 50%;" onclick="updateAuto2()"><h3>Add</h3><h5>Auto-Discovery</h5></button></span>'))
-    $('#challenges2').append($('<span title="Are you sure?"><button class="delete-button col-md-2 " style="background: rgb(222, 139, 136);border-radius: 50%;color:white;" onclick="deleteAll()"><span class="delete-off"><h3>Delete</h3><h5>All Discovery Sets</h5></span><span class="delete-on" style="display:none;"><h3>DELETE</h3><h5>EVERYTHING?</h5></span></button></span><center class="preview0"><span class="preview"></center>'))
+    $('#challenges2').append($('<span title="Auto Discovery"><button class="auto-button col-md-2 " style="background:lightblue;border-radius: 30%;" onclick="updateAuto2()"><h3>Add</h3><h5>Auto-Discovery</h5></button></span>'))
+    $('#challenges2').append($('<span title="Are you sure?"><button class="delete-button col-md-2 " style="background: rgb(222, 139, 136);border-radius: 30%;color:white;" onclick="deleteAll()"><span class="delete-off"><h3>Delete</h3><h5>All Discovery Sets</h5></span><span class="delete-on" style="display:none;"><h3>DELETE</h3><h5>EVERYTHING?</h5></span></button></span><center class="preview0"><span class="preview"></center>'))
 
-    $('.preview').append('<tr class="preview2">');$('.preview2').append('<button style="background: lightblue;" class="preview3" onclick="setTimeout(preview(), 0)"><h3>Preview</h3></button></tr></span><tr id="disc-drop-0"><div id="current-discoveryList-0" style="display: none;"></div><div id="chal-discoveryList-0" style="display: none;"></div>');$('.preview3').append('</tr>');
+    $('.preview').append('<tr class="preview2">');$('.preview2').append('<button style="background: #affaae; color: black; border-radius: 30%" class="preview-button" onclick="setTimeout(preview(), 0)"><h3>Preview</h3></button></tr></span><tr id="disc-drop-0"><div id="current-discoveryList-0" style="display: none;"></div><div id="chal-discoveryList-0" style="display: none;"></div>');$('.preview-button').append('</tr>');
 
     $.post(script_root + "/admin/chals", {
         'nonce': $('#nonce').val()
@@ -104,33 +104,40 @@ function loadchals2(){
         $('.chal-button').mouseenter(function (e) {
             id = this.value
             
-            $(this).css({"color": "white" , "background" : "red"})
+            $(this).css({"border-radius": "50%", "color": "white" , "background" : "red"})
             $("#disc-drop-"+id+" p").hide()
             $("#disc-drop-"+id+" h5").hide()
             $("#disc-drop-"+id+" h3").show()
+            
         });
         $('.chal-button').mouseleave(function (e) {
             id = this.value
             
-            $(this).css({"color" : "white", "background" : "grey"});
+            $(this).css({"border-radius": "0%", "color" : "white", "background" : "grey"});
             $("#disc-drop-"+id+" p").show()
             $("#disc-drop-"+id+" h5").show()
             $("#disc-drop-"+id+" h3").hide()
         });
 
         $('.auto-button').mouseenter(function (e) {           
-            $(this).css({"color": "white" , "background" : "red"})
+            $(this).css({"border-radius": "100%","color": "white" , "background" : "#337ab7"})
         });
         $('.auto-button').mouseleave(function (e) {
-            $(this).css({"color" : "black", "background" : "lightblue"});
+            $(this).css({"border-radius": "30%","color" : "black", "background" : "lightblue"});
+        });
+        $('.preview-button').mouseenter(function (e) {           
+            $(this).css({"border-radius": "100%","color" : "white", "background" : "#de9191"})
+        });
+        $('.preview-button').mouseleave(function (e) {
+            $(this).css({"border-radius": "30%","color": "black" , "background" : "#affaae"});
         });
         $('.delete-button').mouseenter(function (e) {           
-            $(this).css({"color": "white" , "background" : "#c83232"})
+            $(this).css({"border-radius": "100%", "color": "white" , "background" : "#c83232"})
             $('.delete-off').hide()
             $('.delete-on').show()
         });
         $('.delete-button').mouseleave(function (e) {
-            $(this).css({"color" : "#f5eeed", "background" : "#de8b88"});
+            $(this).css({"border-radius": "30%", "color" : "#f5eeed", "background" : "#de8b88"});
             $('.delete-on').hide()
             $('.delete-off').show()
         });
@@ -223,10 +230,10 @@ function preview(){
                     $(this).css({"background" : "#de9191"});
                 });
             } else if(solvedList.indexOf($(this)[0].value) >= 0){
-                $(this).css({"color": "black", "background" : "#7dc8e1"});
+                $(this).css({"color": "black", "background" : "lightblue"});
                 //console.log($(this)[0].value + " has been shown")
                 $(this).mouseleave(function (e) {
-                    $(this).css({"color": "black", "background" : "#7dc8e1"});
+                    $(this).css({"color": "black", "background" : "lightblue"});
                 });
             } else{
                 $(this).css({"color": "black", "background" : "#affaae"});
@@ -237,7 +244,7 @@ function preview(){
             }
             
             $(this).mouseenter(function (e) {           
-                $(this).css({"background" : "#7dc8e1"})
+                $(this).css({"background" : "lightblue"})
             });
             
 
