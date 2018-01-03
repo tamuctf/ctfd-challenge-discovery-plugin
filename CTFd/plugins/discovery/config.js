@@ -72,7 +72,7 @@ function loadchals2(){
                       }
                   
  
-                      discovery = "<td style='background-color: #4bcdcd; auto-buttonborder: 1px solid #dddddd;' id='NeededSet-"+(discoveryList[j].chal)+"-"+counter+ "'><span class='chal-discovery discovery-"+ (discoveryList[j].chal) + "' value='"+ discoveryList[j].chal +"'>"
+                      discovery = "<td style='background-color: #4bcdcd; border: 1px solid #dddddd;' id='NeededSet-"+(discoveryList[j].chal)+"-"+counter+ "'><span class='chal-discovery discovery-"+ (discoveryList[j].chal) + "' value='"+ discoveryList[j].chal +"'>"
                       
                       for (var k=0; k < andSet.length; k++){
                           discovery += "<p id='Needed-"+(discoveryList[j].chal)+'-'+counter+'-'+counter2+"' style='color:red;' value='"+andSet2[k]+"'>"+andSet[k]+"</p>"
@@ -153,18 +153,31 @@ $(function(){
 
 function preview(){
   solved = [];
-
-  $('#chal-discoveryList-0 > span').each(function(i, e){
-      solved.push($(e).text());
-  });
   
+  //setTimeouts are used to keep control of raceconditions when preview
+  //is exexuted more than once before reloading page
+
+  setTimeout(function(){
+      $('#chal-discoveryList-0 > span').each(function(i, e){
+          solved.push($(e).text());
+      });
+  }, 0);
+  
+  setTimeout(function(){ loadchals2(); }, 0);
+
+
+  setTimeout(function(){
   $.post(script_root + '/admin/discoveryList/preview', {'solved':solved, 'nonce': $('#nonce').val()})
 
   $.get(script_root + '/admin/discoveryList/preview', function(data){
         discoveryList = $.parseJSON(JSON.stringify(data));
         solvedList = discoveryList['solved'];
+        if(solvedList.length > 0){
+            solvedList = solvedList[0].split('&')
+        }
         discoveryList = discoveryList['hidden'];
-        console.log(solvedList);
+        //console.log(solvedList);
+        
 
         $('.chal-button').each(function(){
             discovery = [];
@@ -176,29 +189,59 @@ function preview(){
                 children = $(e).children('p')
                 //console.log($(e).value)
                 for (var i = 0; i < children.length; i++) {
-                    child = ($('#NeededSet-'+chalid+'-'+i+' > span > p'))
+                    child = ($('#NeededSet-'+chalid+'-'+currentList+' > span > p'))
+                    counter = 0;
                     //console.log('Child: '); console.log(child);
                     for (var n = 0; n < child.length; n++) {
-                        //console.log('Child2: '); console.log(child[i]); console.log(" id: "); console.log(child[i].getAttribute("value"));
-                        //console.log(solvedList);
+                        //console.log('Child: '); console.log(child); console.log(" n: " + n + "i: " + i + "current: " + currentList);
+                        
                         if(solvedList.indexOf(child[n].getAttribute("value")) >= 0){
                             $('#Needed-'+chalid+'-'+currentList+'-'+n).css({"color" : "#affaae"});
+                            //console.log($('#Needed-'+chalid+'-'+currentList+'-'+n).text())
                         } else {
                             $('#Needed-'+chalid+'-'+currentList+'-'+n).css({"color" : "#de9191"});
+                            counter=-1;
                         }
+                    }
+                    if(counter == 0){
+                        //console.log('challenge: ' + chalid + " has dropdown: " + currentList + " solved, since " + i)
+                        $('#NeededSet-'+chalid+'-'+currentList).css({"background" : "#0f960f"});
+                    } else {
+                        $('#NeededSet-'+chalid+'-'+currentList).css({"background" : "#af3232"});
                     }
                 }
                 discovery.push($(e).text());
-                currentList++;
+                currentList++;    
             });
-            console.log(discovery)
+            //console.log(discovery)
 
+            color_a=""; color_op="";text_a="";text_op=""
             if(discoveryList.indexOf($(this)[0].value) >= 0){
                 $(this).css({"background" : "#de9191"});
+                //console.log($(this)[0].value + " has been hidden")
+                $(this).mouseleave(function (e) {
+                    $(this).css({"background" : "#de9191"});
+                });
+            } else if(solvedList.indexOf($(this)[0].value) >= 0){
+                $(this).css({"color": "black", "background" : "#7dc8e1"});
+                //console.log($(this)[0].value + " has been shown")
+                $(this).mouseleave(function (e) {
+                    $(this).css({"color": "black", "background" : "#7dc8e1"});
+                });
             } else{
                 $(this).css({"color": "black", "background" : "#affaae"});
+                //console.log($(this)[0].value + " has been shown")
+                $(this).mouseleave(function (e) {
+                    $(this).css({"color": "black", "background" : "#affaae"});
+                });
             }
             
+            $(this).mouseenter(function (e) {           
+                $(this).css({"background" : "#7dc8e1"})
+            });
+            
+
+
         });
 
         for (var i = 0; i < discoveryList.length; i++) {
@@ -208,6 +251,7 @@ function preview(){
 
 
     });
+    }, 100);
   
 }
 
