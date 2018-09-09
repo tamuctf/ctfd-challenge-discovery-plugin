@@ -26,7 +26,7 @@ from CTFd import utils
 
 class DiscoveryList(db.Model):
         id = db.Column(db.Integer, primary_key=True)
-        chal = db.Column(db.Integer, db.ForeignKey('challenges.id'))
+        chal = db.Column(db.Integer)
         discovery = db.Column(db.String(80))
 
         def __init__(self, chal, discovery):
@@ -299,7 +299,6 @@ def load(app):
                 else:
                     abort(403)
         if utils.user_can_view_challenges() and (utils.ctf_started() or utils.is_admin()):
-            teamid = session.get('id')
             chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
 
             # Only one line in chals() needed to add for Challenge Discovery
@@ -311,7 +310,9 @@ def load(app):
             for x in chals:
                 tags = [tag.tag for tag in Tags.query.add_columns('tag').filter_by(chal=x.id).all()]
                 files = [str(f.location) for f in Files.query.filter_by(chal=x.id).all()]
-                unlocked_hints = set([u.itemid for u in Unlocks.query.filter_by(model='hints', teamid=teamid)])
+                unlocked_hints = []
+                if utils.authed():
+                    unlocked_hints = set([u.itemid for u in Unlocks.query.filter_by(model='hints', teamid=session['id'])])
                 hints = []
                 for hint in Hints.query.filter_by(chal=x.id).all():
                     if hint.id in unlocked_hints or utils.ctf_ended():
@@ -360,11 +361,12 @@ def load(app):
               #print("NEEDED: " + str(and_list))
               for need_solved in and_list: # For each AND elem
                 show = 2
-                for z in Solves.query.add_columns('chalid').filter_by(teamid=session['id']).all():
-                  if need_solved == z.chalid:
-                    show = 1 # Chal is solved and is needed
-                    #print("Challenge ID: " + str(need_solved) + " has been solved & is needed")
-                    break
+                if utils.authed():
+                  for z in Solves.query.add_columns('chalid').filter_by(teamid=session['id']).all():
+                    if need_solved == z.chalid:
+                      show = 1 # Chal is solved and is needed
+                      #print("Challenge ID: " + str(need_solved) + " has been solved & is needed")
+                      break
                 if (show == 2): #Challenge is not solved and is needed
                   and_list=[] # Mark wrong
                   break
