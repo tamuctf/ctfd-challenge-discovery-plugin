@@ -3,7 +3,7 @@ import hashlib
 import json
 from socket import inet_aton, inet_ntoa
 from struct import unpack, pack, error as struct_error
-from flask import current_app as app, render_template, request, redirect, jsonify, url_for, Blueprint, session
+from flask import current_app as app, render_template, request, redirect, jsonify, url_for, Blueprint, session, abort
 from passlib.hash import bcrypt_sha256
 from sqlalchemy.sql import not_
 from CTFd.models import db, Teams, Solves, Awards, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Pages, Config, Unlocks, DatabaseError, Hints, Unlocks
