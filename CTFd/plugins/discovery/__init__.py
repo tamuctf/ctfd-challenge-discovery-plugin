@@ -13,7 +13,6 @@ from CTFd.plugins.challenges import get_chal_class
 from sqlalchemy.sql import or_
 
 from CTFd.utils import ctftime, view_after_ctf, authed, unix_time, get_kpm, user_can_view_challenges, is_admin, get_config, get_ip, is_verified, ctf_started, ctf_ended, ctf_name, admins_only
-# from CTFd.models import Hint
 from CTFd.admin import admin
 from CTFd.challenges import challenges
 
@@ -125,8 +124,8 @@ def load(app):
             json_data = {'Challenge': [], 'Dependent Challenges': [[]]}
             if auto == "basic": #Simple Auto Discovery
                #Challenges appear after the previous challenge in category was solved 
-
-               chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
+               chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all() #doesn't seem to be working
+               #chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
                for x in chals:
                    json_data['Challenge'].append(x.id)
                    chals_cat = [chal for chal in chals if (chal != x and chal.value <= x.value and chal.category == x.category)]
@@ -272,23 +271,6 @@ def load(app):
             db.session.commit()
             db.session.close()
             return '1'
-    #@admin.route('/admin/chal/delete', methods=['POST'])
-    #@admins_only
-    #def admin_delete_chal():
-     #   challenge = Challenges.query.filter_by(id=request.form['id']).first_or_404()
-      #  WrongKeys.query.filter_by(chalid=challenge.id).delete()
-       # Solves.query.filter_by(chalid=challenge.id).delete()
-        #Keys.query.filter_by(chal=challenge.id).delete()
-        #files = Files.query.filter_by(chal=challenge.id).all()
-        #for f in files:
-        #    utils.delete_file(f.id)
-        #Files.query.filter_by(chal=challenge.id).delete()
-        #Tags.query.filter_by(chal=challenge.id).delete()
-        #DiscoveryList.query.filter_by(chal=challenge.id).delete()
-        #Challenges.query.filter_by(id=challenge.id).delete()
-        #db.session.commit()
-        #db.session.close()
-        #return '1'
 
     @challenges.route('/chals', methods=['GET'])
     def chals():
@@ -378,7 +360,6 @@ def load(app):
         return discovered 
     
     app.view_functions['challenges.chals'] = chals
-    #app.view_functions['admin.admin_delete_chal'] = admin_delete_chal
     app.view_functions['admin.admin_delete_discoveryList'] = admin_delete_discoveryList
     app.view_functions['challenges.discovery'] = discovery
     
