@@ -5,14 +5,16 @@ function loadchals2(){
     $('#challenges2').empty();
     $('#challenges2').append($('<center><span title="Toggle Challenge Discovery"><label class="switch"><input id="check" type="checkbox" onclick="updateStatus()"><span class="slider"></span></label></span></center>'))
     //$('#challenges2').append($('<span title="Auto Discovery" style="display:none"><label class="switch"><input id="auto" type="checkbox" onclick="updateAuto()"><span class="slider"></span></label></span>'))
-    $('#challenges2').append($('<span title="Auto Discovery"><button class="auto-button col-md-2 " style="background:lightblue;border-radius: 30%;" onclick="updateAuto2()"><h3>Add</h3><h5>Auto-Discovery</h5></button></span>'))
+    $('#challenges2').append($('<span title="Auto Discovery"><button class="auto-button col-md-2 " style="background:lightblue;border-radius: 30%; margin-right:15px;" onclick="updateAuto2()"><h3>Add</h3><h5>Auto-Discovery</h5></button></span>'))
     $('#challenges2').append($('<span title="Are you sure?"><button class="delete-button col-md-2 " style="background: rgb(222, 139, 136);border-radius: 30%;color:white;" onclick="deleteAll()"><span class="delete-off"><h3>Delete</h3><h5>All Discovery Sets</h5></span><span class="delete-on" style="display:none;"><h3>DELETE</h3><h5>EVERYTHING?</h5></span></button></span><center class="preview0"><span class="preview"></center>'))
 
-    $('.preview').append('<tr class="preview2">');$('.preview2').append('<button style="background: #affaae; color: black; border-radius: 30%" class="preview-button" onclick="setTimeout(preview(), 0)"><h3>Preview</h3></button></tr></span><tr id="disc-drop-0"><div id="current-discoveryList-0" style="display: none;"></div><div id="chal-discoveryList-0" style="display: none;"></div>');$('.preview-button').append('</tr>');
+    $('.preview').append('<tr class="preview2">');$('.preview2').append('<button style="background: #affaae; margin-bottom:15px; margin-top:15px;color: black; border-radius: 30%" class="preview-button" onclick="setTimeout(preview(), 0)"><h3>Preview</h3></button></tr></span><tr id="disc-drop-0"><div id="current-discoveryList-0" style="display: none;"></div><div id="chal-discoveryList-0" style="display: none;"></div>');$('.preview-button').append('</tr>');
 
+	//calling challenges.py
     $.post(script_root + "/admin/chals", {
         'nonce': $('#nonce').val()
-    }, function (data) {
+    }, 
+	function (data) {
         categories = [];
         challenges = $.parseJSON(JSON.stringify(data));
         chalList = [];
@@ -38,16 +40,16 @@ function loadchals2(){
         }
 
         for (var i = 1; i < categories_list.length; i++){
-            $('#challenges2').append($('<tr id="' + categories[i-1] + '"><td class="col-md-1"><h2>' + categories[i-1] + '</h2></td></tr>'))
+            $('#challenges2').append($('<tr id="' + categories[i-1] + '"><td class="col-md-1"><h2 style = "margin-bottom:100px;">' + categories[i-1] + '</h2></td></tr>'))
             //console.log('cat');console.log(categories_list[i])
             for (var x = 0; x < categories_list[i].length; x++){
                 challenge = categories_list[i][x];
                 //console.log('chal');console.log(categories_list[i][x])
-                var chalDisc = '<table class="discovery" id="discovery-{0}" value="{1}" cellspacing="0" cellpadding="0" style="display: inline-block;"></table></br></br></br></br>'.format(challenge.id, challenge.name);
+                var chalDisc = '<table class="discovery" id="discovery-{0}" value="{1}" cellspacing="0" cellpadding="0" style="display: inline-block;margin-right:20px; margin-bottom:20px"></table></br></br></br></br>'.format(challenge.id, challenge.name);
                 
                 $('#challenges2').append($(chalDisc));
                 
-                $('#discovery-'+challenge.id).append('<tr id="disc-drop-'+challenge.id+'"><td><button class="chal-button col-md-2" style="background:grey;" value="{0}"><h5>{1}</h5><p>{2}</p><h3 style="display:none;padding-top:12px;padding-bottom:12px;margin-top:5px;">UPDATE</h3></button></td><td><div id="current-discoveryList-{0}" style="display: none;"></div><div id="chal-discoveryList-{0}" style="display: none;"></div>'.format(challenge.id, challenge.name, challenge.value));
+                $('#discovery-'+challenge.id).append('<tr id="disc-drop-'+challenge.id+'"><td><button class="chal-button" style="background:grey;padding:5px 30px;text-align:center;font-size:14px;margin-right:10px;" value="{0}"><h5>{1}</h5><p>{2}</p><h3 style="display:none;padding-bottom:12px;padding-right:5px;margin-top:25px;text-align:center;font-size:16px;">UPDATE</h3></button></td><td><div id="current-discoveryList-{0}" style="display: none;"></div><div id="chal-discoveryList-{0}" style="display: none;"></div>'.format(challenge.id, challenge.name, challenge.value));
               
                $('#disc-drop-'+challenge.id).append(builddiscovery(challenge.name, challenge.id, chal_ordered));
 
@@ -113,7 +115,7 @@ function loadchals2(){
         $('.chal-button').mouseleave(function (e) {
             id = this.value
             
-            $(this).css({"border-radius": "0%", "color" : "white", "background" : "grey"});
+            $(this).css({"border-radius": "0%", "color" : "white", "background" : "grey",});
             $("#disc-drop-"+id+" p").show()
             $("#disc-drop-"+id+" h5").show()
             $("#disc-drop-"+id+" h3").hide()
@@ -347,7 +349,7 @@ function updateStatus(){
 
 function loadStatus(){
     $.get(script_root + '/admin/discoveryList/0', function(data){
-        var status =[];
+        //var status =[];
         status = $.parseJSON(JSON.stringify(data));
         status = status['service'][0]
 
